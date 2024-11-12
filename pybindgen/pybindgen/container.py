@@ -4,15 +4,14 @@ Wrap C++ STL containers
 
 #import warnings
 
-from .typehandlers.base import ForwardWrapperBase, ReverseWrapperBase, \
+from typehandlers.base import ForwardWrapperBase, ReverseWrapperBase, \
     Parameter, ReturnValue, param_type_matcher, return_type_matcher, \
     TypeConfigurationError, NotSupportedError
 
-from pybindgen.typehandlers import codesink
-from pybindgen.pytypeobject import PyTypeObject
-from .typehandlers.ctypeparser import TypeTraits
-from . import settings
-from . import utils
+from typehandlers import codesink
+from pytypeobject import PyTypeObject
+import settings
+import utils
 
 
 class IterNextWrapper(ForwardWrapperBase):
@@ -62,7 +61,7 @@ class IterNextWrapper(ForwardWrapperBase):
         """
         code_sink -- a CodeSink instance that will receive the generated code
         """
-
+        
         tmp_sink = codesink.MemoryCodeSink()
         self.generate_body(tmp_sink)
         code_sink.writeln("static PyObject* %s(%s *self)" % (self.c_function_name,
@@ -168,7 +167,7 @@ class Container(object):
                 container_type = self
             self.ThisContainerRefParameter = ThisContainerRefParameter
             try:
-                param_type_matcher.register(name + '&', self.ThisContainerRefParameter)
+                param_type_matcher.register(name+'&', self.ThisContainerRefParameter)
             except ValueError:
                 pass
 
@@ -178,7 +177,7 @@ class Container(object):
                 container_type = self
             self.ThisContainerPtrParameter = ThisContainerPtrParameter
             try:
-                param_type_matcher.register(name + '*', self.ThisContainerPtrParameter)
+                param_type_matcher.register(name+'*', self.ThisContainerPtrParameter)
             except ValueError:
                 pass
 
@@ -190,13 +189,13 @@ class Container(object):
             self.ThisContainerRefReturn = ThisContainerReturn
             try:
                 return_type_matcher.register(name, self.ThisContainerReturn)
-                return_type_matcher.register(name + '&', self.ThisContainerRefReturn)
+                return_type_matcher.register(name, self.ThisContainerRefReturn)
             except ValueError:
                 pass
 
     def __repr__(self):
         return "<pybindgen.Container %r>" % self.full_name
-
+    
     def get_module(self):
         """Get the Module object this type belongs to"""
         return self._module
@@ -207,7 +206,7 @@ class Container(object):
         self._update_names()
 
     module = property(get_module, set_module)
-
+    
     def get_pystruct(self):
         if self._pystruct is None:
             raise ValueError
@@ -221,7 +220,7 @@ class Container(object):
     iter_pystruct = property(get_iter_pystruct)
 
     def _update_names(self):
-
+        
         prefix = settings.name_prefix.capitalize()
 
         if not self._full_name_is_definitive:
@@ -277,7 +276,7 @@ class Container(object):
         try:
             param_type_matcher.register(alias+'&', self.ThisContainerRefParameter)
         except ValueError: pass
-
+        
         self.ThisContainerReturn.CTYPES.append(alias)
         try:
             return_type_matcher.register(alias, self.ThisContainerReturn)
@@ -372,7 +371,7 @@ typedef struct {
         self._generate_iter_methods(code_sink)
         self._generate_container_constructor(code_sink)
         self._generate_type_structure(code_sink, docstring)
-
+        
     def _generate_type_structure(self, code_sink, docstring):
         """generate the type structure"""
 
@@ -438,7 +437,7 @@ static void
 %s(%s *self)
 {
     %s
-    Py_TYPE(self)->tp_free((PyObject*)self);
+    self->ob_type->tp_free((PyObject*)self);
 }
 ''' % (container_tp_dealloc_function_name, self.pystruct,
        self._get_container_delete_code()))
@@ -454,7 +453,7 @@ static void
 {
     Py_CLEAR(self->container);
     %s
-    Py_TYPE(self)->tp_free((PyObject*)self);
+    self->ob_type->tp_free((PyObject*)self);
 }
 ''' % (iter_tp_dealloc_function_name, self.iter_pystruct, self._get_iter_delete_code()))
 
@@ -487,7 +486,7 @@ static PyObject*
 ''' % subst_vars)
 
         self.pytype.slots.setdefault("tp_iter", container_tp_iter_function_name)
-
+        
 
         # -- iterator --
         container_tp_iter_function_name = "_wrap_%s__tp_iter" % (self.pystruct,)
@@ -506,7 +505,7 @@ static PyObject*
         iternext = IterNextWrapper(self)
         iternext.generate(code_sink)
         self.iter_pytype.slots.setdefault("tp_iternext", iternext.c_function_name)
-
+        
 
 
     def _generate_container_constructor(self, code_sink):
@@ -662,16 +661,16 @@ class ContainerReturnValueBase(ReturnValue):
         super(ContainerReturnValueBase, self).__init__(ctype)
         ## name of the PyFoo * variable used in return value building
         self.py_name = None
-
-
-
+        
+        
+    
 
 class ContainerParameter(ContainerParameterBase):
     "Container handlers"
     CTYPES = []
     container_type = _get_dummy_container()
     DIRECTIONS = [Parameter.DIRECTION_IN]
-
+    
     def convert_python_to_c(self, wrapper):
         "parses python args to get C++ value"
         assert isinstance(wrapper, ForwardWrapperBase)
@@ -705,7 +704,7 @@ class ContainerRefParameter(ContainerParameterBase):
     CTYPES = []
     container_type = _get_dummy_container()
     DIRECTIONS = [Parameter.DIRECTION_IN, Parameter.DIRECTION_OUT, Parameter.DIRECTION_INOUT]
-
+    
     def convert_python_to_c(self, wrapper):
         "parses python args to get C++ value"
         assert isinstance(wrapper, ForwardWrapperBase)
@@ -771,7 +770,7 @@ class ContainerPtrParameter(ContainerParameterBase):
             if transfer_ownership is None:
                 raise TypeConfigurationError("transfer_ownership parameter was not given")
             self.transfer_ownership = transfer_ownership
-
+    
     def convert_python_to_c(self, wrapper):
         "parses python args to get C++ value"
         assert isinstance(wrapper, ForwardWrapperBase)
@@ -818,15 +817,12 @@ class ContainerPtrParameter(ContainerParameterBase):
 class ContainerReturnValue(ContainerReturnValueBase):
     "Container type return handlers"
     CTYPES = []
-
-    NO_RETVAL_DECL = True
     container_type = _get_dummy_container()
 
     def __init__(self, ctype, is_const=False):
         """override to fix the ctype parameter with namespace information"""
         if ctype == self.container_type.name:
             ctype = self.container_type.full_name
-
         super(ContainerReturnValue, self).__init__(ctype)
         self.is_const = is_const
 
@@ -834,25 +830,11 @@ class ContainerReturnValue(ContainerReturnValueBase):
         """See ReturnValue.get_c_error_return"""
         return "return %s();" % (self.container_type.full_name,)
 
-    def _get_noref_ctype(self):
-        # if the type has foo const &, get back foo
-        traits = TypeTraits(str(self.type_traits.ctype_no_const_no_ref))
-        ctype_no_const_no_ref = traits.ctype_no_const_no_ref
-        return ctype_no_const_no_ref
-
     def convert_c_to_python(self, wrapper):
         """see ReturnValue.convert_c_to_python"""
-
-        ctype_no_const_no_ref = self._get_noref_ctype()
-        retval = wrapper.declarations.declare_variable(
-            str(ctype_no_const_no_ref), 'retval')
-        assert retval == 'retval'
-
         py_name = wrapper.declarations.declare_variable(
             self.container_type.pystruct+'*', 'py_'+self.container_type.name)
-
         self.py_name = py_name
-
         wrapper.after_call.write_code(
             "%s = PyObject_New(%s, %s);" %
             (py_name, self.container_type.pystruct, '&'+self.container_type.pytypestruct))
@@ -861,10 +843,6 @@ class ContainerReturnValue(ContainerReturnValueBase):
 
     def convert_python_to_c(self, wrapper):
         """see ReturnValue.convert_python_to_c"""
-        if '&' in self.ctype:
-            raise NotSupportedError("reference return type not supported")
-        retval = wrapper.declarations.declare_variable(self.ctype, 'retval')
-        assert retval == 'retval'
         wrapper.parse_params.add_parameter('O&', [self.container_type.python_to_c_converter, '&'+self.value])
 
 

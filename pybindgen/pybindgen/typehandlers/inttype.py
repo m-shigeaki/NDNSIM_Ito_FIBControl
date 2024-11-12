@@ -3,10 +3,10 @@
 # pylint: disable-msg=C0111
 
 import struct
-assert struct.calcsize(b'i') == 4 # assumption is made that sizeof(int) == 4 for all platforms pybindgen runs on
+assert struct.calcsize('i') == 4 # assumption is made that sizeof(int) == 4 for all platforms pybindgen runs on
 
 
-from .base import ReturnValue, Parameter, PointerParameter, PointerReturnValue, \
+from base import ReturnValue, Parameter, PointerParameter, PointerReturnValue, \
      ReverseWrapperBase, ForwardWrapperBase, TypeConfigurationError, NotSupportedError
 
 
@@ -91,7 +91,7 @@ class UnsignedIntPtrParam(PointerParameter):
 
                 wrapper.before_call.write_code("%(elem)s = PyList_GET_ITEM(%(py_list)s, %(idx)s);" % vars())
                 wrapper.before_call.write_error_check(
-                        '!PyNumber_Check(%(elem)s)',
+                        '!(PyInt_Check(%(elem)s) || PyLong_Check(%(elem)s))',
                         'PyErr_SetString(PyExc_TypeError, "Parameter `%s\' must be a list of %i ints / longs");'
                         % (self.name, self.array_length))
                 wrapper.before_call.write_code("%(name)s[%(idx)s] = PyLong_AsUnsignedInt(%(elem)s);" % vars())
@@ -146,7 +146,7 @@ class IntPtrParam(PointerParameter):
                   Parameter.DIRECTION_IN|Parameter.DIRECTION_OUT]
     CTYPES = ['int*']
 
-    def __init__(self, ctype, name, direction=None, is_const=None, transfer_ownership=None, default_value=None):
+    def __init__(self, ctype, name, direction=None, is_const=None, transfer_ownership=None):
         if direction is None:
             if is_const:
                 direction = Parameter.DIRECTION_IN
@@ -154,7 +154,7 @@ class IntPtrParam(PointerParameter):
                 raise TypeConfigurationError("direction not given")
         
         super(IntPtrParam, self).__init__(ctype, name, direction, is_const, transfer_ownership)
-        self.default_value = default_value
+
     
     def convert_c_to_python(self, wrapper):
         if self.direction & self.DIRECTION_IN:
@@ -163,43 +163,13 @@ class IntPtrParam(PointerParameter):
             wrapper.parse_params.add_parameter("i", [self.value], self.name)
 
     def convert_python_to_c(self, wrapper):
-        #import sys
-        #sys.stderr.write("***************"  +self.default_value + "\n")
-        optional = bool(self.default_value in ['NULL', '0'])
-        if optional:
-            name_int = wrapper.declarations.declare_variable(self.ctype_no_const[:-1], self.name+"_int")
-            name_obj = wrapper.declarations.declare_variable("PyObject*", self.name+"_obj", "NULL")
-            name_ptr = wrapper.declarations.declare_variable(self.ctype_no_const, self.name+"_ptr")
-            wrapper.call_params.append(name_ptr)
-            if self.direction & self.DIRECTION_IN:
-                wrapper.parse_params.add_parameter('O', ['&'+name_obj], self.name, optional=True)
-                wrapper.before_call.write_code(
-                    "if (%(name_obj)s) {\n"
-                    "    %(name_int)s = PyInt_AsLong(%(name_obj)s);\n"
-                    "    %(name_ptr)s = &%(name_obj)s;\n"
-                    "} else {\n"
-                    "    %(name_ptr)s = NULL;\n"
-                    "}\n"
-                    % vars())
-                wrapper.before_call.write_error_check("PyErr_Occurred()")
-            if self.direction & self.DIRECTION_OUT:
-                wrapper.after_call.write_code(
-                    "if (%(name_obj)s) {\n"
-                    "    %(name_obj)s = PyInt_FromLong(%(name_int)s);\n"
-                    "} else {\n"
-                    "    %(name_obj)s = Py_None;\n"
-                    "    Py_INCREC(%(name_obj)s);\n"
-                    "}\n"
-                    % vars())
-                wrapper.build_params.add_parameter("N", [name_obj])
-        else:
-            name = wrapper.declarations.declare_variable(self.ctype_no_const[:-1], self.name)
-            wrapper.call_params.append('&'+name)
-            if self.direction & self.DIRECTION_IN:
-                wrapper.parse_params.add_parameter('i', ['&'+name], self.name)
-            if self.direction & self.DIRECTION_OUT:
-                wrapper.build_params.add_parameter("i", [name])
-            
+        name = wrapper.declarations.declare_variable(self.ctype_no_const[:-1], self.name)
+        wrapper.call_params.append('&'+name)
+        if self.direction & self.DIRECTION_IN:
+            wrapper.parse_params.add_parameter('i', ['&'+name], self.name)
+        if self.direction & self.DIRECTION_OUT:
+            wrapper.build_params.add_parameter("i", [name])
+        
 
 
 class IntRefParam(Parameter):
@@ -476,7 +446,6 @@ class Int8Return(ReturnValue):
 
 
 
-
 class UnsignedLongLongParam(Parameter):
 
     DIRECTIONS = [Parameter.DIRECTION_IN]
@@ -607,9 +576,9 @@ class SizeTReturn(ReturnValue):
         # using the intermediate variable is not always necessary but
         # it's safer this way in case of weird platforms where
         # sizeof(size_t) != sizeof(unsigned PY_LONG_LONG).
-        name = wrapper.declarations.declare_variable("unsigned PY_LONG_LONG", "retval_tmp")
+        name = wrapper.declarations.declare_variable("unsigned PY_LONG_LONG", "retval_tmp", self.value)
         wrapper.parse_params.add_parameter("K", ["&"+name], prepend=True)
-        wrapper.after_call.write_code("%s = %s;" % (self.value, name))
+        wrapper.after_call.write_code("retval = %s;" % (name))
 
     def convert_c_to_python(self, wrapper):
         wrapper.build_params.add_parameter("K", ["((unsigned PY_LONG_LONG) %s)" % self.value], prepend=True)
@@ -755,7 +724,7 @@ class UnsignedInt16PtrParam(PointerParameter):
             wrapper.parse_params.add_parameter('H', [self.value], self.name)
 
     def convert_python_to_c(self, wrapper):
-        name = wrapper.declarations.declare_variable(str(self.type_traits.target), self.name, self.default_value)
+        name = wrapper.declarations.declare_variable(str(self.type_traits.target), self.name)
         wrapper.call_params.append('&'+name)
         if self.direction & self.DIRECTION_IN:
             wrapper.parse_params.add_parameter('H', ['&'+name], self.name)

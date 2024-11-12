@@ -3,7 +3,7 @@ The class that generates code to keep track of existing python
 wrappers for a given root class.
 """
 
-from pybindgen.typehandlers.base import NotSupportedError
+from typehandlers.base import NotSupportedError
 
 
 class WrapperRegistry(object):
@@ -122,8 +122,9 @@ class StdMapWrapperRegistry(WrapperRegistry):
         #code_block.write_code('std::cerr << "Erase Wrapper: obj=" <<(void *) %s << std::endl;'
         #                      % (object_rvalue))
         iterator = code_block.declare_variable("std::map<void*, PyObject*>::iterator", "wrapper_lookup_iter")
-        code_block.write_code("%(ITER)s = %(MAP)s.find((void *) %(OBJECT_VALUE)s);\n"
+        code_block.write_code("%(ITER)s = %(MAP)s.find((void *) %(WRAPPER)s->obj);\n"
                               "if (%(ITER)s != %(MAP)s.end()) {\n"
                               "    %(MAP)s.erase(%(ITER)s);\n"
                               "}\n"
-                              % dict(ITER=iterator, MAP=self.map_name, WRAPPER=wrapper_lvalue, OBJECT_VALUE=object_rvalue))
+                              % dict(ITER=iterator, MAP=self.map_name, WRAPPER=wrapper_lvalue))
+

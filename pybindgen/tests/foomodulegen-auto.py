@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import unicode_literals, print_function, absolute_import
 
 import sys
 import os
@@ -20,7 +19,7 @@ def my_module_gen():
     module_parser = ModuleParser('foo2', '::')
     module_parser.enable_anonymous_containers = True
 
-    print("PYTHON_INCLUDES:", repr(sys.argv[2]), file=sys.stderr)
+    print >> sys.stderr, "PYTHON_INCLUDES:", repr(sys.argv[2])
     gccxml_options = dict(
         include_paths=eval(sys.argv[2]),
         )
@@ -28,8 +27,6 @@ def my_module_gen():
     module_parser.parse_init([sys.argv[1]], includes=['"foo.h"'], pygen_sink=FileCodeSink(pygen_file),
                              gccxml_options=gccxml_options)
     module = module_parser.module
-    foomodulegen_common.customize_module_pre(module)
-
     module.add_exception('exception', foreign_cpp_namespace='std', message_rvalue='%(EXC)s.what()')
     module_parser.scan_types()
     module_parser.scan_methods()
@@ -57,10 +54,10 @@ def main():
             except ImportError:
                 my_module_gen()
             else:
-                print("** running under profiler", file=sys.stderr)
+                print >> sys.stderr, "** running under profiler"
                 profile.run('my_module_gen()', 'foomodulegen-auto.pstat')
         else:
-            my_module_gen()
+            my_module_gen()            
 
 if __name__ == '__main__':
     main()

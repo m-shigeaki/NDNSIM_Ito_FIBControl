@@ -85,7 +85,7 @@ Forwarder::startProcessInterest(Face& face, const Interest& interest)
 	catch (const tlv::Error&) {
 		NFD_LOG_DEBUG("startProcessInterest face=" << face.getId() <<
 				" interest=" << interest.getName() << " malformed");
-		// It's safe to call interest.getName() because Name has been fully parsed
+	// It's safe to call interest.getName() because Name has been fully parsed
 		return;
 	}
 
@@ -1294,6 +1294,9 @@ Forwarder::onContentStoreHit(const Face& inFace, const shared_ptr<pit::Entry>& p
 	data.setTag<lp::PartialHopTag>(nullptr);
 	data.setTag<lp::CountTag>(nullptr);
 	
+	//m_cs.update();
+	
+	
 
 	beforeSatisfyInterest(*pitEntry, *m_csFace, data);
 	this->dispatchToStrategy(*pitEntry,
@@ -1850,33 +1853,33 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 		currentNodeName = "Producer4";
 		break;
   }
-  //*/
+  /*
 
-	// if(ns3::getChoiceType() == 4){
-	// 	if(data.getTag<lp::FunctionNameTag>() != nullptr){
-	// 		if(26 <= currentNode && currentNode <= 40){
-	// 			Name funcName = *(data.getTag<lp::FunctionNameTag>());
-	// 			std::string funcStr = funcName.toUri();
-	// 			std::string separator = "/";
-	// 			if(funcStr.size()>1){
-	// 				funcStr = separator + currentNodeName + funcStr;
-	// 			}else{
-	// 				funcStr = funcStr + currentNodeName;
-	// 			}
+	 if(ns3::getChoiceType() == 4){
+	 	if(data.getTag<lp::FunctionNameTag>() != nullptr){
+	 		if(26 <= currentNode && currentNode <= 40){
+	 			Name funcName = *(data.getTag<lp::FunctionNameTag>());
+	 			std::string funcStr = funcName.toUri();
+	 			std::string separator = "/";
+	 			if(funcStr.size()>1){
+					funcStr = separator + currentNodeName + funcStr;
+	 			}else{
+	 				funcStr = funcStr + currentNodeName;
+	 			}
 
-	// 			funcName = Name(funcStr);
-	// 			data.setTag<lp::FunctionNameTag>(make_shared<lp::FunctionNameTag>(funcName));
-	// 		}
-	// 	}
-	// }
+	 			funcName = Name(funcStr);
+	 			data.setTag<lp::FunctionNameTag>(make_shared<lp::FunctionNameTag>(funcName));
+	 		}
+	 	}
+	 }
+*/
 
-
-	std::cout << "Data Packet" << std::endl;
-	std::cout << "Node          : " << currentNodeName << std::endl;
-	std::cout << "Content  Name : " << data.getName() << std::endl;
+//	std::cout << "Data Packet" << std::endl;
+//	std::cout << "Node          : " << currentNodeName << std::endl;
+//	std::cout << "Content  Name : " << data.getName() << std::endl;
 	//if(ns3::getChoiceType() != 0){
 		if(39 <= currentNode && currentNode <= 53){ //us24:26-40,Sinet,Geant:39-53
-			data.setServiceTime(data.getServiceTime() + time::milliseconds(40));
+			data.setServiceTime(data.getServiceTime() + time::milliseconds(80)); //default40
 		}
 	//}
 
@@ -2107,6 +2110,38 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 		return;
 	}
 
+///*
+	time::nanoseconds Nowtime;
+	time::nanoseconds time2temp;
+  	time::steady_clock::TimePoint dataBackTime;
+
+  for (const shared_ptr<pit::Entry>& pitEntry : pitMatches) {
+    const pit::OutRecordCollection& outRecords = pitEntry->getOutRecords();
+    for (pit::OutRecordCollection::const_iterator it = outRecords.begin();
+                                                  it != outRecords.end(); ++it) {
+      dataBackTime = time::steady_clock::now();
+	  Nowtime = time::duration_cast<time::nanoseconds>(dataBackTime.time_since_epoch());
+	  
+	  //std::cout << Nowtime << std::endl;
+	  //std::cout << dataBackTime << std::endl;
+      //std::cout << it->getLastRenewed() << std::endl;
+      //time2temp = (dataBackTime - it->getLastRenewed() - time::nanoseconds(1000000))/2;
+      time2temp = (dataBackTime - it->getLastRenewed())/2; //latency
+	  //std::cout << time2temp << std::endl;
+	  //std::cout << it->getLastRenewed() << std::endl; 
+    }
+  }
+  
+//  time::nanoseconds time1temp = time::nanoseconds(data.getFreshnessPeriod());
+//  int time1 = time1temp.count();
+  int time2 = time2temp.count(); //latency
+  long long Now = Nowtime.count(); //currenttime
+//*/
+//std::cout << "data" << data << std::endl;
+//std::cout << "time1: " << time1 << std::endl;
+//std::cout << "latency:" << time2 << std::endl;
+//std::cout << "CunrrentTime: " << Now << std::endl;
+
 	//std::cout << "PIT Matches: " << pitMatches.size() << std::endl;
 
 	shared_ptr<Data> dataCopyWithoutTag = make_shared<Data>(data);
@@ -2114,16 +2149,20 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 	dataCopyWithoutTag->removeTag<lp::HopCountTag>();
 
 	// CS insert
-	if (m_csFromNdnSim == nullptr)
-		m_cs.insert(*dataCopyWithoutTag);
-	else
-		m_csFromNdnSim->Add(dataCopyWithoutTag);
-
+	if (m_csFromNdnSim == nullptr){
+		//std::cout << "aaaaa" << std::endl;
+		m_cs.insert(*dataCopyWithoutTag,time2, Now);
+	}
+	else{
+		//std::cout << "aaaaaaa" << std::endl; 
+		m_csFromNdnSim->Add(dataCopyWithoutTag, time2, Now);
+	}
 	std::set<Face*> pendingDownstreams;
 	bool pitSatisfyFlag = true;
 	bool updateControlFlag = true;
 	// foreach PitEntry
 	auto now = time::steady_clock::now();
+
 	for (const shared_ptr<pit::Entry>& pitEntry : pitMatches) {
 		//std::cout<<"instanceSETdammy" << pitEntry->getSelectedInstance()<<std::endl;
 		if(ns3::getChoiceType()==4 && updateControlFlag){
@@ -2226,6 +2265,8 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 void
 Forwarder::onDataUnsolicited(Face& inFace, const Data& data)
 {
+	//int latency = 0;
+	//long long currenttime = 0LL;
 	// accept to cache?
 	fw::UnsolicitedDataDecision decision = m_unsolicitedDataPolicy->decide(inFace, data);
 	if (decision == fw::UnsolicitedDataDecision::CACHE) {

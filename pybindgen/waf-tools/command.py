@@ -1,15 +1,15 @@
-from waflib import TaskGen# import feature, taskgen_method, before_method, task_gen
-from waflib import Node, Task, Utils, Build
+import TaskGen# import feature, taskgen_method, before_method, task_gen
+import Node, Task, Utils, Build
 import subprocess
-from waflib import Options
+import Options
 
 import shellcmd
 #shellcmd.subprocess = pproc # the WAF version of the subprocess module is supposedly less buggy
 
-from waflib.Logs import debug, error
+from Logs import debug, error
 shellcmd.debug = debug
 
-from waflib import Task
+import Task
 
 import re
 
@@ -83,17 +83,17 @@ class command_task(Task.Task):
 		namespace.update(env=self.env, SRC=self.inputs, TGT=self.outputs)
 		for cmd in pipeline.pipeline:
 			if isinstance(cmd, shellcmd.Command):
-				if isinstance(cmd.stdin, str):
+				if isinstance(cmd.stdin, basestring):
 					cmd.stdin = self._subst_arg(cmd.stdin, 'in', namespace)
-				if isinstance(cmd.stdout, str):
+				if isinstance(cmd.stdout, basestring):
 					cmd.stdout = self._subst_arg(cmd.stdout, 'out', namespace)
-				if isinstance(cmd.stderr, str):
+				if isinstance(cmd.stderr, basestring):
 					cmd.stderr = self._subst_arg(cmd.stderr, 'out', namespace)
-				for argI in range(len(cmd.argv)):
+				for argI in xrange(len(cmd.argv)):
 					cmd.argv[argI] = self._subst_arg(cmd.argv[argI], None, namespace)
 				if cmd.env_vars is not None:
 					env_vars = dict()
-					for name, value in list(cmd.env_vars.items()):
+					for name, value in cmd.env_vars.iteritems():
 						env_vars[name] = self._subst_arg(value, None, namespace)
 					cmd.env_vars = env_vars
 			elif isinstance(cmd, shellcmd.Chdir):

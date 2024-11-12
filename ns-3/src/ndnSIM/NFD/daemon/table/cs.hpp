@@ -71,7 +71,9 @@ public:
   /** \brief inserts a Data packet
    */
   void
-  insert(const Data& data, bool isUnsolicited = false);
+  insert(const Data& data, bool isUnsolicited = false, int latency = 0, long long currenttime = 0);
+
+
 
   typedef std::function<void(const Interest&, const Data& data)> HitCallback;
   typedef std::function<void(const Interest&)> MissCallback;
@@ -126,9 +128,14 @@ public:
     return m_table.size();
   }
 
+  void
+  update();
+
 PUBLIC_WITH_TESTS_ELSE_PRIVATE:
   void
   dump();
+
+  
 
 public: // enumeration
   struct EntryFromEntryImpl

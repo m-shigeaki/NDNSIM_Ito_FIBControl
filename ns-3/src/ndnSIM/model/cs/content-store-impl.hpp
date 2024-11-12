@@ -53,6 +53,12 @@ public:
   {
   }
 
+  EntryImpl(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime)
+    : Entry(cs, data, latency, currenttime)
+    , item_(0)
+  {
+  }
+
   void
   SetTrie(typename CS::super::iterator item)
   {
@@ -105,8 +111,12 @@ public:
   virtual inline shared_ptr<Data>
   Lookup(shared_ptr<const Interest> interest);
 
-  virtual inline bool
+ virtual inline bool
   Add(shared_ptr<const Data> data);
+
+
+  virtual inline bool
+  Add(shared_ptr<const Data> data, int latency, long long currenttime);
 
   // virtual bool
   // Remove (shared_ptr<Interest> header);
@@ -207,7 +217,9 @@ ContentStoreImpl<Policy>::Lookup(shared_ptr<const Interest> interest)
 {
   NS_LOG_FUNCTION(this << interest->getName());
 
-  typename super::const_iterator node;
+  //typename super::const_iterator node;
+  typename super:: iterator node;
+
   if (interest->getExclude().empty()) {
     node = this->deepest_prefix_match(interest->getName());
   }
@@ -220,6 +232,7 @@ ContentStoreImpl<Policy>::Lookup(shared_ptr<const Interest> interest)
     this->m_cacheHitsTrace(interest, node->payload()->GetData());
 
     shared_ptr<Data> copy = make_shared<Data>(*node->payload()->GetData());
+    node->payload()->UpdateCurrentTime(); //update m_time
     return copy;
   }
   else {
@@ -235,6 +248,33 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
   NS_LOG_FUNCTION(this << data->getName());
 
   Ptr<entry> newEntry = Create<entry>(this, data);
+  std::pair<typename super::iterator, bool> result = super::insert(data->getName(), newEntry);
+
+  if (result.first != super::end()) {
+    if (result.second) {
+      newEntry->SetTrie(result.first);
+
+      m_didAddEntry(newEntry);
+      return true;
+    }
+    else {
+      // should we do anything?
+      // update payload? add new payload?
+      return false;
+    }
+  }
+  else
+    return false; // cannot insert entry
+}
+
+template<class Policy>
+bool
+ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data, int latency, long long currenttime)
+{
+  NS_LOG_FUNCTION(this << data->getName());
+
+  //Ptr<entry> newEntry = Create<entry>(this, data);
+  Ptr<entry> newEntry = Create<entry>(this, data, latency, currenttime);
   std::pair<typename super::iterator, bool> result = super::insert(data->getName(), newEntry);
 
   if (result.first != super::end()) {

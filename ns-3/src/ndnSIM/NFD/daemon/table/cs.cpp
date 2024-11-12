@@ -47,7 +47,7 @@ BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<Cs::const_iterator>));
 unique_ptr<Policy>
 makeDefaultPolicy()
 {
-  const std::string DEFAULT_POLICY = "priority_fifo";
+  const std::string DEFAULT_POLICY = "lru";
   return Policy::create(DEFAULT_POLICY);
 }
 
@@ -79,8 +79,9 @@ Cs::setPolicy(unique_ptr<Policy> policy)
   m_policy->setLimit(limit);
 }
 
+
 void
-Cs::insert(const Data& data, bool isUnsolicited)
+Cs::insert(const Data& data, bool isUnsolicited, int latency, long long currenttime)
 {
   NFD_LOG_DEBUG("insert " << data.getName());
 
@@ -101,10 +102,13 @@ Cs::insert(const Data& data, bool isUnsolicited)
   bool isNewEntry = false;
   iterator it;
   // use .insert because gcc46 does not support .emplace
-  std::tie(it, isNewEntry) = m_table.insert(EntryImpl(data.shared_from_this(), isUnsolicited));
+  std::tie(it, isNewEntry) = m_table.insert(EntryImpl(data.shared_from_this(), isUnsolicited, latency, currenttime));
   EntryImpl& entry = const_cast<EntryImpl&>(*it);
 
+
   entry.updateStaleTime();
+  //entry.updateCurrentTime();
+  
 
   if (!isNewEntry) { // existing entry
     // XXX This doesn't forbid unsolicited Data from refreshing a solicited entry.
@@ -153,6 +157,8 @@ Cs::find(const Interest& interest,
   NFD_LOG_DEBUG("  matching " << match->getName());
   m_policy->beforeUse(match);
   hitCallback(interest, match->getData());
+  EntryImpl& entry = const_cast<EntryImpl&>(*match);
+  entry.updateCurrentTime();
 }
 
 iterator
@@ -186,11 +192,11 @@ Cs::findRightmost(const Interest& interest, iterator first, iterator last) const
     NFD_LOG_TRACE("  find-under-prefix " << prefix);
     iterator match = this->findLeftmost(interest, left, right);
     if (match != right) {
-      return match;
+      return match; 
     }
     right = left;
   }
-  return last;
+  return last; //not found match
 }
 
 iterator

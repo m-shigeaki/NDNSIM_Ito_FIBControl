@@ -7073,8 +7073,8 @@ Consumer::OnData(shared_ptr<const Data> data)
 
 	m_rtt->AckSeq(SequenceNumber32(seq));
 
-	if(getServiceNum() == 300)
-		Simulator::Stop();
+	//if(getServiceNum() == 300)
+	//	Simulator::Stop();
 
 }
 

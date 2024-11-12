@@ -6,14 +6,14 @@ import warnings
 import traceback
 from copy import copy
 
-from pybindgen.typehandlers.base import ForwardWrapperBase, ReverseWrapperBase, \
+from typehandlers.base import ForwardWrapperBase, ReverseWrapperBase, \
     join_ctype_and_name, CodeGenerationError
-from pybindgen.typehandlers.base import ReturnValue, Parameter
-from pybindgen.typehandlers import codesink
-from pybindgen import overloading
-from pybindgen import settings
-from pybindgen import utils
-from pybindgen.cppexception import CppException
+from typehandlers.base import ReturnValue, Parameter
+from typehandlers import codesink
+import overloading
+import settings
+import utils
+from cppexception import CppException
 
 
 class CppMethod(ForwardWrapperBase):
@@ -125,8 +125,7 @@ class CppMethod(ForwardWrapperBase):
         self.throw = list(throw)
 
         self.custodians_and_wards = [] # list of (custodian, ward, postcall)
-        from . import cppclass
-        cppclass.scan_custodians_and_wards(self)
+        cppclass_typehandlers.scan_custodians_and_wards(self)
 
 
     def add_custodian_and_ward(self, custodian, ward, postcall=None):
@@ -192,19 +191,13 @@ class CppMethod(ForwardWrapperBase):
             return False
         return True
 
-    def get_custom_name(self):
-        if self.mangled_name != utils.get_mangled_name(self.method_name, self.template_parameters):
-            return self.mangled_name
-        else:
-            return None
-
     def set_custom_name(self, custom_name):
         if custom_name is None:
             self.mangled_name = utils.get_mangled_name(self.method_name, self.template_parameters)
         else:
             self.mangled_name = custom_name
 
-    custom_name = property(get_custom_name, set_custom_name)
+    custom_name = property(None, set_custom_name)
 
     def clone(self):
         """Creates a semi-deep copy of this method wrapper.  The returned
@@ -219,8 +212,7 @@ class CppMethod(ForwardWrapperBase):
                          is_virtual=self.is_virtual,
                          is_pure_virtual=self.is_pure_virtual,
                          is_const=self.is_const,
-                         visibility=self.visibility,
-                         custom_name=self.custom_name)
+                         visibility=self.visibility)
         meth._class = self._class
         meth.docstring = self.docstring
         meth.wrapper_base_name = self.wrapper_base_name
@@ -309,14 +301,12 @@ class CppMethod(ForwardWrapperBase):
 
     def _before_call_hook(self):
         "hook that post-processes parameters and check for custodian=<n> CppClass parameters"
-        from . import cppclass
-        cppclass.implement_parameter_custodians_precall(self)
+        cppclass_typehandlers.implement_parameter_custodians_precall(self)
 
     def _before_return_hook(self):
         """hook that post-processes parameters and check for custodian=<n>
         CppClass parameters"""
-        from . import cppclass
-        cppclass.implement_parameter_custodians_postcall(self)
+        cppclass_typehandlers.implement_parameter_custodians_postcall(self)
 
     def _get_pystruct(self):
         # When a method is used in the context of a helper class, we
@@ -555,8 +545,7 @@ class CppConstructor(ForwardWrapperBase):
         self.throw = list(throw)
 
         self.custodians_and_wards = [] # list of (custodian, ward, postcall)
-        from . import cppclass
-        cppclass.scan_custodians_and_wards(self)
+        cppclass_typehandlers.scan_custodians_and_wards(self)
 
 
     def add_custodian_and_ward(self, custodian, ward, postcall=None):
@@ -638,7 +627,7 @@ class CppConstructor(ForwardWrapperBase):
         else:
             ## We should only create a helper class instance when
             ## being called from a user python subclass.
-            self.before_call.write_code("if (Py_TYPE(self) != &%s)" % class_.pytypestruct)
+            self.before_call.write_code("if (self->ob_type != &%s)" % class_.pytypestruct)
             self.before_call.write_code("{")
             self.before_call.indent()
 
@@ -684,13 +673,11 @@ class CppConstructor(ForwardWrapperBase):
 
     def _before_call_hook(self):
         "hook that post-processes parameters and check for custodian=<n> CppClass parameters"
-        from . import cppclass
-        cppclass.implement_parameter_custodians_precall(self)
+        cppclass_typehandlers.implement_parameter_custodians_precall(self)
 
     def _before_return_hook(self):
         "hook that post-processes parameters and check for custodian=<n> CppClass parameters"
-        from . import cppclass
-        cppclass.implement_parameter_custodians_postcall(self)
+        cppclass_typehandlers.implement_parameter_custodians_postcall(self)
 
     def generate(self, code_sink, wrapper_name=None, extra_wrapper_params=()):
         """
@@ -1054,18 +1041,15 @@ class CppVirtualMethodProxy(ReverseWrapperBase):
         self.before_call.add_cleanup_code('Py_XDECREF(%s);' % py_method)
         
         self.before_call.write_code(
-            r'if (%s == NULL || Py_TYPE(%s) == &PyCFunction_Type) {' % (py_method, py_method))
+            r'if (%s == NULL || %s->ob_type == &PyCFunction_Type) {' % (py_method, py_method))
         if self.return_value.ctype == 'void':
             if not (self.method.is_pure_virtual or self.method.visibility == 'private'):
                 self.before_call.write_code(r'    %s::%s(%s);'
                                             % (self.class_.full_name, self.method_name, call_params))
-            self.before_call.indent()
             self.before_call.write_cleanup()
-            self.before_call.write_code('return;')
-            self.before_call.unindent()
+            self.before_call.write_code(r'    return;')
         else:
             if self.method.is_pure_virtual or self.method.visibility == 'private':
-                from . import cppclass
                 if isinstance(self.return_value, cppclass.CppClassReturnValue) \
                         and self.return_value.cpp_class.has_trivial_constructor:
                     pass
@@ -1119,8 +1103,8 @@ class CustomCppMethodWrapper(CppMethod):
     NEEDS_OVERLOADING_INTERFACE = True
 
     def __init__(self, method_name, wrapper_name, wrapper_body=None,
-                 flags=('METH_VARARGS', 'METH_KEYWORDS'), docstring=None):
-        super(CustomCppMethodWrapper, self).__init__(method_name, ReturnValue.new('void'), [], docstring=docstring)
+                 flags=('METH_VARARGS', 'METH_KEYWORDS')):
+        super(CustomCppMethodWrapper, self).__init__(method_name, ReturnValue.new('void'), [])
         self.wrapper_base_name = wrapper_name
         self.wrapper_actual_name = wrapper_name
         self.meth_flags = list(flags)
@@ -1173,5 +1157,5 @@ class CustomCppConstructorWrapper(CppConstructor):
     def generate_call(self, *args, **kwargs):
         pass
 
-#import cppclass
-#import cppclass_typehandlers
+import cppclass
+import cppclass_typehandlers

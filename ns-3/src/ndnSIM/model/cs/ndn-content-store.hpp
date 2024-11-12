@@ -64,6 +64,8 @@ public:
    */
   Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data);
 
+  Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime);
+
   /**
    * \brief Get prefix of the stored entry
    * \returns prefix of the stored entry
@@ -84,9 +86,26 @@ public:
   Ptr<ContentStore>
   GetContentStore();
 
+  //const Name&
+  //GetFunction();
+
+  const bool
+  hasFunction();
+
+  const int
+  GetLatency();
+
+  const long long
+  GetCurrentTime();
+
+  void
+  UpdateCurrentTime();
+
 private:
   Ptr<ContentStore> m_cs;        ///< \brief content store to which entry is added
   shared_ptr<const Data> m_data; ///< \brief non-modifiable Data
+  int m_latency;
+  long long m_time;
 };
 
 } // namespace cs
@@ -129,6 +148,9 @@ public:
    */
   virtual bool
   Add(shared_ptr<const Data> data) = 0;
+
+  virtual bool
+  Add(shared_ptr<const Data> data, int latency, long long currenttime) = 0;
 
   // /*
   //  * \brief Add a new content to the content store.

@@ -66,6 +66,15 @@ public: // exposed through ContentStore enumeration
     return m_data->getFullName();
   }
 
+  ///*
+  const Name&
+  getFunction() const
+  {
+    BOOST_ASSERT(this->hasData());
+    return m_data->getFunction();
+  }
+  //*/
+
   /** \return whether the stored Data is unsolicited
    *  \pre hasData()
    */
@@ -86,6 +95,39 @@ public: // exposed through ContentStore enumeration
     BOOST_ASSERT(this->hasData());
     return m_staleTime;
   }
+
+  //masuda
+
+  const int&
+  getLatency() const
+  {
+    BOOST_ASSERT(this->hasData());
+    return m_latency;
+  }
+
+  void 
+  setLatency(const int& latency)
+  {
+    m_latency = latency;
+  }
+
+
+  const long long&
+  getCurrentTime() const
+  {
+    BOOST_ASSERT(this->hasData());
+    return m_currenttime;
+  }
+
+  void
+  setCurrentTime(const long long& currenttime)
+  {
+    m_currenttime = currenttime;
+  }
+
+ // const int&
+ // getMetricsTime() const;
+  
 
   /** \brief checks if the stored Data is stale now
    *  \pre hasData()
@@ -133,10 +175,15 @@ public: // used by generic ContentStore implementation
   void
   reset();
 
+  void
+  updateCurrentTime();
+
 private:
   shared_ptr<const Data> m_data;
   bool m_isUnsolicited;
-  time::steady_clock::TimePoint m_staleTime;
+  time::steady_clock::TimePoint m_staleTime; 
+  int m_latency; //masuda
+  long long m_currenttime;
 };
 
 } // namespace cs

@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import unicode_literals, print_function
 
 import sys
 import os.path
@@ -45,14 +44,13 @@ class MyMultiSectionFactory(MultiSectionFactory):
     def close(self):
         self.header_sink.file.close()
         self.main_sink.file.close()
-        for sink in self.section_sinks.values():
+        for sink in self.section_sinks.itervalues():
             sink.file.close()
 
 def my_module_gen():
     out = MyMultiSectionFactory(sys.argv[1])
     root_module = foomodulegen_split.module_init()
     root_module.add_exception('exception', foreign_cpp_namespace='std', message_rvalue='%(EXC)s.what()')
-    foomodulegen_common.customize_module_pre(root_module)
 
     foomodulegen_split.register_types(root_module)
     foomodulegen_split.register_methods(root_module)
@@ -71,6 +69,6 @@ if __name__ == '__main__':
     except ImportError:
         my_module_gen()
     else:
-        print("** running under profiler", file=sys.stderr)
+        print >> sys.stderr, "** running under profiler"
         profile.run('my_module_gen()', 'foomodulegen4.pstat')
 

@@ -1,7 +1,7 @@
 # docstrings not neede here (the type handler interfaces are fully
 # documented in base.py) pylint: disable-msg=C0111
 
-from .base import ReturnValue, PointerReturnValue, Parameter, PointerParameter, ReverseWrapperBase, ForwardWrapperBase
+from base import ReturnValue, PointerReturnValue, Parameter, PointerParameter, ReverseWrapperBase, ForwardWrapperBase
 
 
 class CStringParam(PointerParameter):
@@ -223,21 +223,6 @@ class StdStringReturn(ReturnValue):
                                                   '(%s).size()' % self.value],
                                            prepend=True)
 
-
-class StdStringRefReturn(ReturnValue):
-
-    CTYPES = ['std::string &']
-
-    # Implementing reverse wrapper with reference types is not impossible but really hard
-    def get_c_error_return(self):
-        raise NotImplementedError
-    def convert_python_to_c(self, wrapper):
-        raise NotImplementedError
-
-    def convert_c_to_python(self, wrapper):
-        wrapper.build_params.add_parameter("s#", ['(%s).c_str()' % self.value,
-                                                  '(%s).size()' % self.value],
-                                           prepend=True)
 
 
 class GlibStringParam(Parameter):

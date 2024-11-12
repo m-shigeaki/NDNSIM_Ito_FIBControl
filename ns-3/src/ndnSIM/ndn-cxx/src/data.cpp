@@ -81,10 +81,6 @@ Data::wireEncode(EncodingImpl<TAG>& encoder, bool unsignedPortion/* = false*/) c
   // MetaInfo
   totalLength += getMetaInfo().wireEncode(encoder);
 
-  // Function Name by konomu
-  // if(!getFunction().empty()){
-  //   totalLength += getFunction().wireEncodeFunc(encoder);
-  // }
 
   //ServiceTime
 	if (getServiceTime() >= time::milliseconds::zero() &&
@@ -95,7 +91,12 @@ Data::wireEncode(EncodingImpl<TAG>& encoder, bool unsignedPortion/* = false*/) c
 				getServiceTime().count());
 	}
   
-
+  // Function Name by konomu
+///*
+   if(!getFunction().empty()){
+     totalLength += getFunction().wireEncodeFunc(encoder);
+   }
+//*/
   // Name
   totalLength += getName().wireEncode(encoder);
 
@@ -178,11 +179,12 @@ Data::wireDecode(const Block& wire)
   m_name.wireDecode(m_wire.get(tlv::Name));
 
   // Function Name by konomu
-//   Block::element_const_iterator val = m_wire.find(tlv::FunctionName);
-//   if (val != m_wire.elements_end()){
-//     m_functionName.wireDecodeFunc(*val);
-// }
-
+///* 
+    Block::element_const_iterator val1 = m_wire.find(tlv::FunctionName);
+    if (val1 != m_wire.elements_end()){
+     m_functionName.wireDecodeFunc(*val1);
+ }
+//*/
 //ServiceTime
 	Block::element_const_iterator val = m_wire.find(tlv::ServiceTime);
 	if (val != m_wire.elements_end()) {
@@ -244,30 +246,30 @@ Data::setName(const Name& name)
 }
 
 //by konomu
+///*
+ void
+ Data::setFunction(const Name& name)
+ {
+   onChanged();
+ 	m_functionName = name;
+ }
+//*/
 
-// void
-// Data::setFunction(const Name& name)
-// {
-//   onChanged();
-// 	m_functionName = name;
-// }
-
-
-
-// Name
-// Data::removeHeadFunction(std::string& funcStr)
-// {
-// 	int pos = funcStr.find("/", 1);
-// 	if(pos == -1 && funcStr.size() > 1){
-// 		funcStr.erase(1, funcStr.size()-1);
-// 		return Name(funcStr);
-// 	}
-// 	else if(pos != -1){
-// 		funcStr.erase(1, pos);
-// 		return Name(funcStr);
-// 	}
-// }
-
+///*
+ Name
+ Data::removeHeadFunction(std::string& funcStr)
+ {
+ 	int pos = funcStr.find("/", 1);
+ 	if(pos == -1 && funcStr.size() > 1){
+ 		funcStr.erase(1, funcStr.size()-1);
+ 		return Name(funcStr);
+ 	}
+    	else if(pos != -1){
+ 		funcStr.erase(1, pos);
+ 		return Name(funcStr);
+ 	}
+ }
+//*/
 const Name&
 Data::getFullName() const
 {
@@ -446,7 +448,7 @@ bool
 Data::operator==(const Data& other) const
 {
   return getName() == other.getName() &&
-    //getFunction() == other.getFunction() && //by konomu
+    getFunction() == other.getFunction() && //by konomu
     getMetaInfo() == other.getMetaInfo() &&
     getContent() == other.getContent() &&
     getSignature() == other.getSignature();
@@ -462,7 +464,7 @@ std::ostream&
 operator<<(std::ostream& os, const Data& data)
 { 
   os << "Name: " << data.getName() << "\n";
-  //os << "getFunctionName: " << data.getFunction() << "\n";//by konomu
+  os << "getFunctionName: " << data.getFunction() << "\n";//by konomu
   os << "MetaInfo: " << data.getMetaInfo() << "\n";
   os << "Content: (size: " << data.getContent().value_size() << ")\n";
   os << "Signature: (type: " << data.getSignature().getType() <<

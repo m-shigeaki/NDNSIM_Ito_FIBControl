@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*.ipp": "cpp",
+        "bitset": "cpp",
+        "random": "cpp",
+        "future": "cpp",
+        "hash_map": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "slist": "cpp",
+        "ostream": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}

@@ -1,31 +1,23 @@
 """
 C wrapper wrapper
 """
-from pybindgen.typehandlers.base import TypeConfigurationError, CodeGenerationError, NotSupportedError
-from pybindgen.typehandlers.base import ForwardWrapperBase
-from pybindgen.typehandlers.codesink import NullCodeSink
-from . import utils
-from . import settings
+from typehandlers.base import TypeConfigurationError, CodeGenerationError, NotSupportedError
+from typehandlers.base import ForwardWrapperBase
+from typehandlers.codesink import NullCodeSink
+import utils
+import settings
 import traceback
 import sys
 
-PY3 = (sys.version_info[0] >= 3)
-if PY3:
-    import types
-    string_types = str,
-else:
-    string_types = basestring,
+try: 
+    set 
+except NameError: 
+    from sets import Set as set   # Python 2.3 fallback 
 
 
-try:
-    set
-except NameError:
-    from sets import Set as set   # Python 2.3 fallback
-
-
-def isiterable(obj):
+def isiterable(obj): 
     """Returns True if an object appears to be iterable"""
-    return hasattr(obj, '__iter__') or isinstance(obj, string_types)
+    return hasattr(obj, '__iter__') or isinstance(obj, basestring)
 
 def vector_counter(vec):
     """
@@ -33,14 +25,14 @@ def vector_counter(vec):
     [[1, 'a', 'x'], [1, 'a', 'y'], [1, 'b', 'x'], [1, 'b', 'y'], [2, 'a', 'x'], [2, 'a', 'y'], [2, 'b', 'x'], [2, 'b', 'y']]
     """
     iters = [iter(l) for l in vec]
-    values = [next(it) for it in iters[:-1]] + [vec[-1][0]]
+    values = [it.next() for it in iters[:-1]] + [vec[-1][0]]
     while 1:
-        for idx in range(len(iters)-1, -1, -1):
+        for idx in xrange(len(iters)-1, -1, -1):
             try:
-                values[idx] = next(iters[idx])
+                values[idx] = iters[idx].next()
             except StopIteration:
                 iters[idx] = iter(vec[idx])
-                values[idx] = next(iters[idx])
+                values[idx] = iters[idx].next()
             else:
                 break
         else:
@@ -72,7 +64,7 @@ class OverloadedWrapper(object):
         self.pystruct = 'PyObject'
         #self.static_decl = True ## FIXME: unused?
 #         self.enable_implicit_conversions = True
-
+        
     def add(self, wrapper):
         """
         Add a wrapper to the overloaded wrapper
@@ -94,7 +86,7 @@ class OverloadedWrapper(object):
 
         for wrapper in self.wrappers:
             wrapper.force_parse = ForwardWrapperBase.PARSE_TUPLE_AND_KEYWORDS
-
+        
         # loop that keeps removing wrappers until all remaining wrappers have the same flags
         modified = True
         while modified:
@@ -104,10 +96,10 @@ class OverloadedWrapper(object):
                 try:
                     wrapper_flags = utils.call_with_error_handling(
                         wrapper.get_py_method_def_flags, args=(), kwargs={}, wrapper=wrapper)
-                except utils.SkipWrapper:
-                    _, ex, tb = sys.exc_info()
+                except utils.SkipWrapper, ex:
                     modified = True
                     self.wrappers.remove(wrapper)
+                    dummy1, dummy2, tb = sys.exc_info()
                     settings.error_handler.handle_error(wrapper, ex, tb)
                     break
 
@@ -119,10 +111,6 @@ class OverloadedWrapper(object):
                         modified = True
                         self.wrappers.remove(wrapper)
                         tb = traceback.extract_stack()
-                        ex = utils.SkipWrapper(
-                            "overloading: removed the wrapper %s because its"
-                            " method flags are different from existing ones."
-                            % (wrapper,))
                         settings.error_handler.handle_error(wrapper, ex, tb)
                         break
 
@@ -196,7 +184,7 @@ class OverloadedWrapper(object):
             ## aggregator wrapper should not be generated either..
             if not delegate_wrappers:
                 raise utils.SkipWrapper
-
+            
             ## Generate the 'main wrapper' that calls the other ones
             code_sink.writeln()
             self.wrapper_return = self.RETURN_TYPE
@@ -225,7 +213,7 @@ class OverloadedWrapper(object):
                 ## free previous exceptions and return the result
                 code_sink.writeln("if (!exceptions[%i]) {" % number)
                 code_sink.indent()
-                for i in range(number):
+                for i in xrange(number):
                     code_sink.writeln("Py_DECREF(exceptions[%i]);" % i)
                 code_sink.writeln("return retval;")
                 code_sink.unindent()
@@ -236,7 +224,7 @@ class OverloadedWrapper(object):
             ## raise an appropriate exception, free the previous
             ## exceptions, and return NULL
             code_sink.writeln('error_list = PyList_New(%i);' % len(delegate_wrappers))
-            for i in range(len(delegate_wrappers)):
+            for i in xrange(len(delegate_wrappers)):
                 code_sink.writeln(
                     'PyList_SET_ITEM(error_list, %i, PyObject_Str(exceptions[%i]));'
                     % (i, i))
@@ -246,9 +234,9 @@ class OverloadedWrapper(object):
             code_sink.writeln(self.ERROR_RETURN)
             code_sink.unindent()
             code_sink.writeln('}')
-
+            
         return prototype_line
-
+        
     def get_py_method_def(self, name):
         """
         Returns an array element to use in a PyMethodDef table.
@@ -273,19 +261,10 @@ class OverloadedWrapper(object):
                             CodeGenerationError,
                             NotSupportedError):
                         pass
-            # check available docstrings for the overloads
-            docstrings_set = set()
-            for wrap in self.all_wrappers:
-                if wrap.docstring is not None:
-                    docstrings_set.add(wrap.docstring)
-            docstring = None
-            if len(docstrings_set) is 1:
-                docstring = docstrings_set.pop()
-            elif len(docstrings_set) > 1:
-                raise CodeGenerationError("Overloaded '%s' has conflicting docstrings" % self.wrapper_name)
+            docstring = None # FIXME
 
-            assert isinstance(self.wrapper_return, string_types)
-            assert isinstance(self.wrapper_actual_name, string_types)
+            assert isinstance(self.wrapper_return, basestring)
+            assert isinstance(self.wrapper_actual_name, basestring)
             assert isinstance(self.wrapper_args, list)
 
             return "{(char *) \"%s\", (PyCFunction) %s, %s, %s }," % \
@@ -296,8 +275,8 @@ class OverloadedWrapper(object):
         self.reset_code_generation_state()
         self._compute_all_wrappers()
         self.generate(NullCodeSink())
-        assert isinstance(self.wrapper_return, string_types)
-        assert isinstance(self.wrapper_actual_name, string_types)
+        assert isinstance(self.wrapper_return, basestring)
+        assert isinstance(self.wrapper_actual_name, basestring)
         assert isinstance(self.wrapper_args, list)
         code_sink.writeln("%s %s(%s);" % (self.wrapper_return, self.wrapper_actual_name, ', '.join(self.wrapper_args)))
         self.reset_code_generation_state()
@@ -306,8 +285,8 @@ class OverloadedWrapper(object):
         self.reset_code_generation_state()
         self._compute_all_wrappers()
         self.generate(NullCodeSink())
-        assert isinstance(self.wrapper_return, string_types)
-        assert isinstance(self.wrapper_actual_name, string_types)
+        assert isinstance(self.wrapper_return, basestring)
+        assert isinstance(self.wrapper_actual_name, basestring)
         assert isinstance(self.wrapper_args, list)
         name = self.wrapper_actual_name.split('::')[-1]
         code_sink.writeln("static %s %s(%s);" % (self.wrapper_return, name, ', '.join(self.wrapper_args)))
@@ -336,5 +315,5 @@ class OverloadedWrapper(object):
     section = property(get_section)
 
 
-#from pybindgen.cppclass import CppClassParameter, CppClassRefParameter
+from cppclass import CppClassParameter, CppClassRefParameter
 

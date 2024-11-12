@@ -50,7 +50,7 @@ public:
 
   /** \brief construct Entry for storage
    */
-  EntryImpl(shared_ptr<const Data> data, bool isUnsolicited);
+  EntryImpl(shared_ptr<const Data> data, bool isUnsolicited, int latency, long long currenttime);
 
   /** \return true if entry can become stale, false if entry is never stale
    */

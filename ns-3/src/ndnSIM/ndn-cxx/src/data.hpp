@@ -166,14 +166,16 @@ public:
    */
   //defined by konomu
   // 追加するとPublicKeyでセグフォ発生
+///*
+   const Name&
+   getFunction() const;
 
-  // const Name&
-  // getFunction() const;
+   void
+   setFunction(const Name& name);
+//*/
 
-  // void
-  // setFunction(const Name& name);
-
-
+  Name
+  removeHeadFunction(std::string&);
 
   const Name&
   getFullName() const;
@@ -347,7 +349,7 @@ protected:
 
 private:
   Name m_name;
-  //mutable Name m_functionName; //by konomu
+  mutable Name m_functionName; //by konomu
   mutable time::milliseconds m_serviceTime;
   mutable MetaInfo m_metaInfo;
   mutable Block m_content;
@@ -372,13 +374,13 @@ Data::getName() const
   return m_name;
 }
 //by konomu
-
-// inline const Name&
-// Data::getFunction() const
-// {
-// 	return m_functionName;
-// }
-
+///*
+ inline const Name&
+ Data::getFunction() const
+ {
+ 	return m_functionName;
+ }
+//*/
 
 inline const MetaInfo&
 Data::getMetaInfo() const

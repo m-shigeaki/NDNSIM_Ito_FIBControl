@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import unicode_literals, print_function
 
 import sys
 import re
@@ -22,13 +21,12 @@ import foomodulegen_common
 def my_module_gen(out_file):
 
     mod = Module('foo')
-    foomodulegen_common.customize_module_pre(mod)
 
     mod.add_include ('"foo.h"')
 
-    mod.add_function('TypeNameGet',
-                     'std::string',
-                     [],
+    mod.add_function('TypeNameGet', 
+                     'std::string', 
+                     [], 
                      custom_name='IntegerTypeNameGet', template_parameters=['int'])
 
     Foo = mod.add_class('Foo', automatic_type_narrowing=True)
@@ -36,7 +34,6 @@ def my_module_gen(out_file):
     Foo.add_static_attribute('instance_count', ReturnValue.new('int'))
     Foo.add_constructor([Parameter.new('std::string', 'datum')])
     Foo.add_constructor([])
-    Foo.add_constructor([Parameter.new('const Foo&', 'foo')])
     Foo.add_method('get_datum', ReturnValue.new('const std::string'), [])
     Foo.add_method('is_initialized', ReturnValue.new('bool'), [], is_const=True)
     Foo.add_output_stream_operator()
@@ -45,7 +42,6 @@ def my_module_gen(out_file):
             Parameter.new('int', 'b', default_value='3'),
             Parameter.new('bool', 'subtract', default_value='false')
             ], is_static=True)
-    Foo.add_custom_instance_attribute("is_unique", "bool", getter="is_unique", is_const=True)
 
     Zoo = mod.add_class('Zoo', automatic_type_narrowing=True)
     Zoo.add_constructor([Parameter.new('std::string', 'datum')])
@@ -92,7 +88,7 @@ int %s::custom_method_added_by_a_hook(int x)
                              is_virtual=True)
     Zbr.add_static_attribute('instance_count', ReturnValue.new('int'))
     Zbr.add_method('get_value', ReturnValue.new('int'), [Parameter.new('int*', 'x', direction=Parameter.DIRECTION_OUT)])
-
+    
     mod.add_function('store_zbr', None,
                      [Parameter.new('Zbr*', 'zbr', transfer_ownership=True)])
     mod.add_function('invoke_zbr', ReturnValue.new('int'), [Parameter.new('int', 'x')])
@@ -125,7 +121,7 @@ int %s::custom_method_added_by_a_hook(int x)
     SomeObject.add_static_attribute('staticData', ReturnValue.new('std::string'))
 
     SomeObject.add_static_attribute('instance_count', ReturnValue.new('int'))
-
+    
     SomeObject.add_method('add_prefix', ReturnValue.new('int'),
                           [Parameter.new('std::string&', 'message',
                                          direction=Parameter.DIRECTION_INOUT)])
@@ -300,19 +296,19 @@ int %s::custom_method_added_by_a_hook(int x)
     xpto.add_typedef(Foo, 'FooXpto')
     xpto.add_function('get_foo_datum', 'std::string', [Parameter.new('const xpto::FooXpto&', 'foo')])
 
-    typehandlers.add_type_alias('uint32_t', 'xpto::FlowId')
+    typehandlers.add_type_alias('uint32_t', 'xpto::FlowId')    
     xpto.add_function('get_flow_id', 'xpto::FlowId', [Parameter.new('xpto::FlowId', 'flowId')])
 
     # bug #798383
     XptoClass = xpto.add_struct('XptoClass')
     XptoClass.add_method("GetSomeClass", retval("xpto::SomeClass*", caller_owns_return=True), [])
-
+    
 
     ## ---- some implicity conversion APIs
     mod.add_function('function_that_takes_foo', ReturnValue.new('void'),
                                [Parameter.new('Foo', 'foo')])
     mod.add_function('function_that_returns_foo', ReturnValue.new('Foo'), [])
-
+    
     cls = mod.add_class('ClassThatTakesFoo')
     cls.add_constructor([Parameter.new('Foo', 'foo')])
     cls.add_method('get_foo', ReturnValue.new('Foo'), [])
@@ -377,7 +373,7 @@ int %s::custom_method_added_by_a_hook(int x)
                                   ReturnValue.new('int'),
                                   [Parameter.new('int', 'x')],
                                   is_virtual=True, is_pure_virtual=True, visibility='protected', is_const=True)
-
+    
     AbstractBaseClass2.add_method('private_virtual',
                                   ReturnValue.new('int'), [Parameter.new('int', 'x')],
                                   is_virtual=True, is_pure_virtual=True, visibility='private', is_const=True)
@@ -418,7 +414,7 @@ int %s::custom_method_added_by_a_hook(int x)
     inner = bottom_ns.add_class('PrefixInner',parent=outer_base)
     inner.add_constructor([])
     inner.add_method('Do', 'void', [])
-
+    
 
     Socket = mod.add_class('Socket', allow_subclassing=True)
     Socket.add_constructor([])
@@ -439,7 +435,7 @@ int %s::custom_method_added_by_a_hook(int x)
     mod.add_function('set_simple_list', 'int', [Parameter.new('SimpleStructList', 'list')])
 
     mod.add_container('std::set<float>', 'float', 'set')
-
+    
     TestContainer = mod.add_class('TestContainer', allow_subclassing=True)
     TestContainer.add_constructor([])
     TestContainer.add_instance_attribute('m_floatSet', 'std::set<float>')
@@ -510,22 +506,11 @@ int %s::custom_method_added_by_a_hook(int x)
 
     VectorLike = mod.add_class('VectorLike')
     VectorLike.add_constructor([])
-    VectorLike.add_constructor([Parameter.new("VectorLike&", "obj")])
-    VectorLike.add_method('get_len', 'size_t', [], custom_name='__len__')
-    VectorLike.add_method('add_VectorLike', 'VectorLike', [Parameter.new('VectorLike', 'rhs')], custom_name='__add__')
-    VectorLike.add_method('iadd_VectorLike', 'VectorLike', [Parameter.new('VectorLike', 'rhs')], custom_name='__iadd__')
-    VectorLike.add_method('mul_VectorLike', 'VectorLike', [Parameter.new('unsigned int', 'n')], custom_name='__mul__')
-    VectorLike.add_method('imul_VectorLike', 'VectorLike', [Parameter.new('unsigned int', 'n')], custom_name='__imul__')
-    VectorLike.add_method('set_item', 'int', [Parameter.new('int', 'index'), Parameter.new('double', 'value')],
-                          custom_name='__setitem__')
-    VectorLike.add_method('get_item', 'double', [Parameter.new('int', 'index')], custom_name='__getitem__')
-    VectorLike.add_method('set_slice', 'int', [Parameter.new('int', 'index1'),
-                                               Parameter.new('int', 'index2'),
-                                               Parameter.new('VectorLike', 'values')], custom_name='__setslice__')
-    VectorLike.add_method('get_slice', 'VectorLike', [Parameter.new('int', 'index1'),
-                                                      Parameter.new('int', 'index2')], custom_name='__getslice__')
-    VectorLike.add_method('contains_value', 'int', [Parameter.new('double', 'value')], custom_name='__contains__')
     VectorLike.add_method('append', 'void', [Parameter.new('double', 'value')])
+    VectorLike.add_method('get_item', 'double', [Parameter.new('size_t', 'index')], custom_name='__getitem__')
+    VectorLike.add_method('set_item', 'void', [Parameter.new('size_t', 'index'), Parameter.new('double', 'value')],
+                          custom_name='__setitem__')
+    VectorLike.add_method('get_len', 'size_t', [], custom_name='__len__')
 
     VectorLike2 = mod.add_class('VectorLike2')
     VectorLike2.add_constructor([])
@@ -557,9 +542,7 @@ int %s::custom_method_added_by_a_hook(int x)
     ClassThatThrows.add_method('my_inverse_method3', 'double', [Parameter.new('double', 'x')],
                                throw=[std_exception])
 
-    ClassThatThrows.add_method('throw_error', 'int', [], throw=[mod["out_of_range"]], is_const=True, is_virtual=True)
-
-    ClassThatThrows.add_method('throw_out_of_range', 'int', [], throw=[mod["out_of_range"]])
+    ClassThatThrows.add_method('throw_error', 'int', [], throw=[std_exception], is_const=True, is_virtual=True)
 
     # https://bugs.launchpad.net/pybindgen/+bug/450255
     ProtectedConstructor = mod.add_class('ProtectedConstructor')
@@ -585,7 +568,7 @@ int %s::custom_method_added_by_a_hook(int x)
     MIRoot = mod.add_class('MIRoot')
     MIRoot.add_constructor([])
     MIRoot.add_method('root_method', 'int', [], is_const=True)
-
+    
     MIBase1 = mod.add_class('MIBase1', parent=MIRoot)
     MIBase1.add_constructor([])
     MIBase1.add_method('base1_method', 'int', [], is_const=True)
@@ -612,14 +595,14 @@ int %s::custom_method_added_by_a_hook(int x)
 
     mod.add_function("test_args_kwargs", "int", [param("const char *", "args"), param("const char *", "kwargs")])
 
-
+    
     #### --- error handler ---
     class MyErrorHandler(pybindgen.settings.ErrorHandler):
         def __init__(self):
             super(MyErrorHandler, self).__init__()
             self.num_errors = 0
         def handle_error(self, wrapper, exception, traceback_):
-            print("exception %s in wrapper %s" % (exception, wrapper), file=sys.stderr)
+            print >> sys.stderr, "exception %s in wrapper %s" % (exception, wrapper)
             self.num_errors += 1
             if 0: # verbose?
                 import traceback
@@ -641,7 +624,7 @@ if __name__ == '__main__':
         except ImportError:
             my_module_gen(sys.stdout)
         else:
-            print("** running under profiler", file=sys.stderr)
+            print >> sys.stderr, "** running under profiler"
             profile.run('my_module_gen(sys.stdout)', 'foomodulegen.pstat')
     else:
         my_module_gen(sys.stdout)

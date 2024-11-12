@@ -2,13 +2,6 @@
 Objects that receive generated C/C++ code lines, reindents them, and
 writes them to a file, memory, or another code sink object.
 """
-import sys
-PY3 = (sys.version_info[0] >= 3)
-
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
 
 DEBUG = 0
 
@@ -49,7 +42,7 @@ class CodeSink(object):
     def _format_code(self, code):
         """Utility method for subclasses to use for formatting code
         (splits lines and indents them)"""
-        assert isinstance(code, string_types)
+        assert isinstance(code, basestring)
         l = []
         for line in code.split('\n'):
             l.append(' '*self.indent_level + line)

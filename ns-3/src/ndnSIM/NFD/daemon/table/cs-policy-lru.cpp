@@ -25,6 +25,10 @@
 
 #include "cs-policy-lru.hpp"
 #include "cs.hpp"
+#include "cs-policy.hpp"
+
+
+
 
 namespace nfd {
 namespace cs {
@@ -69,9 +73,105 @@ LruPolicy::evictEntries()
   BOOST_ASSERT(this->getCs() != nullptr);
   while (this->getCs()->size() > this->getLimit()) {
     BOOST_ASSERT(!m_queue.empty());
+    
+    //defined by masuda
+    /*
+    //new priority nowtime+latency
+    auto it = m_queue.begin();
+    auto it_min = it;
+    iterator ref = *it;
+
+    auto Late_weight = 1; //con5:10, con6: con7: con8:
+
+    auto metricstime_min = ref->getCurrentTime() + Late_weight*(ref->getLatency());
+
+    for(auto it = m_queue.begin();it != m_queue.end(); ++it){
+       iterator ref = *it;
+      
+       if(metricstime_min > ref->getCurrentTime()+ Late_weight*(ref->getLatency())){
+          metricstime_min = Late_weight * (ref->getLatency()) + ref->getCurrentTime();
+          it_min = it;
+          
+        }
+      }
+    it_min = m_queue.erase(it_min); //new priority end
+    
+    */
+
+
+
+    /* //only latency priority
+     auto it = m_queue.begin();
+     auto it_min = it;
+
+      iterator ref = *it;
+    
+      int latency_min = ref->getLatency();
+      
+      for(auto it = m_queue.begin();it != m_queue.end(); ++it){
+       iterator ref = *it;
+
+       if(latency_min > ref->getLatency()){
+          latency_min = ref->getLatency();
+          it_min = it;
+        }
+      }
+        it_min = m_queue.erase(it_min); //latency priority end
+
+    */
+
+    /* func-LRU start
+    auto it = m_queue.begin();
+   
+      for(auto it = m_queue.begin();it != m_queue.end();++it){
+         auto ref = *it;
+        if(ref->getFunction().empty()){
+          m_queue.erase(it);
+          break;
+        }
+      }
+
     iterator i = m_queue.front();
     m_queue.pop_front();
     this->emitSignal(beforeEvict, i);
+    */ //func-LRU end
+    
+    /* 
+    iterator it;
+    int n = 0;
+    int cnt = 0;
+    
+    for(n = 0;n < getLimit();n++){
+      it = m_queue.front(); 
+      auto ref = *it;
+      
+
+      
+      if(!ref.getFunction().empty()){
+        m_queue.pop_front();
+        this->emitSignal(beforeEvict, it);
+        m_queue.push_back(it);
+        cnt++;
+      }else{
+          m_queue.pop_front();
+          this->emitSignal(beforeEvict, it);
+          break;
+      }
+    }
+    i = m_queue.front();
+    if(cnt == getLimit()){
+      m_queue.pop_front();
+      this->emitSignal(beforeEvict, i);
+    }
+    */
+
+  //default policy  LRU
+ // /*
+    iterator i = m_queue.front();
+    m_queue.pop_front();
+    this->emitSignal(beforeEvict, i); //LRU end
+ // */  
+
   }
 }
 

@@ -3,9 +3,7 @@
 import sys
 
 import pybindgen
-from pybindgen import ReturnValue, Parameter, FileCodeSink
-from pybindgen.module import Module
-from pybindgen.function import Function
+from pybindgen import ReturnValue, Parameter, Module, Function, FileCodeSink
 
 def my_module_gen(out_file):
 

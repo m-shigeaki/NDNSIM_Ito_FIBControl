@@ -1,4 +1,3 @@
-from __future__ import unicode_literals, print_function
 import pybindgen.typehandlers.base as typehandlers
 from pybindgen.typehandlers import stringtype, ctypeparser
 import pybindgen.typehandlers.codesink as codesink
@@ -8,7 +7,6 @@ from pybindgen import module, cppclass, overloading, utils
 import unittest
 import doctest
 import re
-import sys
 
 
 class SmartPointerTransformation(typehandlers.TypeTransformation):
@@ -53,34 +51,29 @@ class ParamLookupTests(unittest.TestCase):
 
     def testLookup(self):
         handler = typehandlers.Parameter.new('testtype*', 'name')
-        self.assertTrue(isinstance(handler, TestParam))
+        self.assert_(isinstance(handler, TestParam))
         self.assertRaises(typehandlers.TypeLookupError, typehandlers.Parameter.new, 'non_existent_type', 'name')
 
     def testLookupTransformed(self):
         transformed = typehandlers.Parameter.new('MySmartPointer<testtype>', 'name')
-        self.assertTrue(isinstance(transformed, TestParam))
-        self.assertTrue(transformed.has_been_transformed)
+        self.assert_(isinstance(transformed, TestParam))
+        self.assert_(transformed.has_been_transformed)
         
 
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
-
-    # FIXME: due to python 2 to python 3 transition, most of the
-    # doctests are failing for trivial reasons.  Don't run these tests
-    # for the time being, until I have time to fix them.
-    if 0: # sys.version_info[0] < 3: # the doctests only work in Python 2
-        for mod in [
-            typehandlers,
-            codesink,
-            module,
-            cppclass,
-            overloading,
-            #utils,
-            stringtype,
-            ctypeparser,
-            ]:
-            suite.addTest(doctest.DocTestSuite(mod))
+    for mod in [
+        typehandlers,
+        codesink,
+        module,
+        cppclass,
+        overloading,
+        #utils,
+        stringtype,
+        ctypeparser,
+        ]:
+        suite.addTest(doctest.DocTestSuite(mod))
 
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ParamLookupTests))
     runner = unittest.TextTestRunner()

@@ -2,17 +2,9 @@
 Wraps enumerations
 """
 
-import sys
-PY3 = (sys.version_info[0] >= 3)
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
-
-
-from pybindgen.typehandlers import inttype
-from pybindgen.typehandlers.base import return_type_matcher, param_type_matcher
-from pybindgen.cppclass import CppClass
+from typehandlers import inttype
+from typehandlers.base import return_type_matcher, param_type_matcher
+from cppclass import CppClass
 
 class Enum(object):
     """
@@ -35,12 +27,12 @@ class Enum(object):
         :param import_from_module: if not None, the enum is defined in
             another module, this parameter gives the name of the module
         """
-        assert isinstance(name, string_types)
+        assert isinstance(name, basestring)
         assert '::' not in name
         assert outer_class is None or isinstance(outer_class, CppClass)
         self.outer_class = outer_class
         for val in values:
-            if not isinstance(val, string_types + (tuple,)):
+            if not isinstance(val, (basestring, tuple)):
                 raise TypeError
 
         #if not name:
@@ -168,7 +160,7 @@ class Enum(object):
                     value_str = "%s::%s" % (self.outer_class.full_name, value)
                 module.after_init.write_code(
                     ' // %s\n'
-                    'tmp_value = PyLong_FromLong(%s);\n'
+                    'tmp_value = PyInt_FromLong(%s);\n'
                     'PyDict_SetItemString((PyObject*) %s.tp_dict, \"%s\", tmp_value);\n'
                     'Py_DECREF(tmp_value);'
                     % (

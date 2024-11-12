@@ -21,6 +21,8 @@
 
 #include "ns3/log.h"
 #include "ns3/packet.h"
+#include "../ndn-cxx/lp/tags.hpp"
+
 
 NS_LOG_COMPONENT_DEFINE("ndn.cs.ContentStore");
 
@@ -59,6 +61,16 @@ namespace cs {
 Entry::Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data)
   : m_cs(cs)
   , m_data(data)
+  , m_latency(0)
+  , m_time(0)
+{
+}
+
+Entry::Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime)
+  : m_cs(cs)
+  , m_data(data)
+  , m_latency(latency)
+  , m_time(currenttime)
 {
 }
 
@@ -78,6 +90,53 @@ Ptr<ContentStore>
 Entry::GetContentStore()
 {
   return m_cs;
+}
+
+/*
+const Name&
+Entry::GetFunction()
+{
+  Name funcname;
+  bool hasFunction = false;
+  if(m_data->getTag<lp::FunctionNameTag>() != nullptr){
+    funcname = *(m_data->getTag<lp::FunctionNameTag>()); 
+    hasFunction = true;
+  }
+  return funcname;
+}
+*/
+
+///*
+const bool
+Entry::hasFunction()
+{
+  if(m_data->getTag<lp::FunctionNameTag>() != nullptr){
+    Name funcname = *(m_data->getTag<lp::FunctionNameTag>()); 
+    std::string funcstr = funcname.toUri();
+    return true;
+  }else{
+    return false;
+  }
+}
+//*/
+const int
+Entry::GetLatency()
+{
+  return m_latency;
+}
+
+const long long
+Entry::GetCurrentTime()
+{
+  return m_time;
+}
+
+void
+Entry::UpdateCurrentTime()
+{
+  auto now = time::steady_clock::now();
+  auto nowtime = time::duration_cast<time::nanoseconds>(now.time_since_epoch());
+  m_time = nowtime.count();
 }
 
 } // namespace cs

@@ -76,9 +76,66 @@ struct lru_policy_traits {
       insert(typename parent_trie::iterator item)
       {
         if (max_size_ != 0 && policy_container::size() >= max_size_) {
-          base_.erase(&(*policy_container::begin()));
+        
+        /* //Latency and Time
+        auto it = policy_container::begin();
+        auto& ref = *it;
+        auto it_min = it;
+
+        auto metricstime_min = ref.payload()->GetLatency() + ref.payload()->GetCurrentTime();
+
+         for(auto it = policy_container::begin();it != policy_container::end();++it){
+           auto& ref = *it;
+           auto it_metricstime = ref.payload()->GetLatency() + ref.payload()->GetCurrentTime();
+
+           if(metricstime_min > it_metricstime){
+             metricstime_min = it_metricstime;
+             it_min = it;
+           }
+         }
+         base_.erase(&(*it_min));
+        */
+
+
+        /* //only-latency start
+        auto it = policy_container::begin();
+        auto& ref = *it;
+        int latency_min = ref.payload()->GetLatency();
+        auto it_min = it;
+        
+        for(auto it = policy_container::begin();it != policy_container::end();++it){
+          auto& ref = *it;
+          int it_latency = ref.payload()->GetLatency();
+
+          if(latency_min > it_latency ){
+            latency_min = it_latency;
+            it_min = it;
+          }
+        }
+        base_.erase(&(*it_min));
+        */ //only-latency end
+
+        /* //Func-LRU
+        bool found = false;
+          
+        for(auto it = policy_container::begin();it != policy_container::end();++it){
+          auto& ref = *it;
+ 
+          if(!ref.payload()->hasFunction()){
+            base_.erase(&(*it));
+            found = true;
+            break;
+          }
         }
 
+        if(!found){
+           base_.erase(&(*policy_container::begin())); 
+        }
+        */
+          base_.erase(&(*policy_container::begin())); //default lru
+        }
+      
+     
         policy_container::push_back(*item);
         return true;
       }

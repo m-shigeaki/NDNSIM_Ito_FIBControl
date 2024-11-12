@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import unicode_literals, print_function
 
 import sys
 import re
@@ -52,9 +51,6 @@ typehandlers.return_type_matcher.register_transformation(transf)
 typehandlers.param_type_matcher.register_transformation(transf)
 del transf
 
-def customize_module_pre(module):
-    standard_error = module.add_exception('out_of_range', foreign_cpp_namespace='std',
-                                          custom_name='IndexError', is_standard_error=True)
 
 
 def customize_module(module):
@@ -86,8 +82,7 @@ _wrap_foofunction_that_takes_foo_from_string(PyObject * PYBINDGEN_UNUSED(dummy),
 '''
     module.add_custom_function_wrapper('function_that_takes_foo',
                                        '_wrap_foofunction_that_takes_foo_from_string',
-                                       wrapper_body,
-                                       docstring="I'm awake you rascals!")
+                                       wrapper_body)
 
 
     ## test a custom method wrapper
@@ -117,8 +112,7 @@ _wrap_PyBar_Hooray_lenx(PyBar *PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject
 '''
     Bar.add_custom_method_wrapper("Hooray", "_wrap_PyBar_Hooray_lenx",
                                   wrapper_body,
-                                  flags=["METH_VARARGS", "METH_KEYWORDS", "METH_STATIC"],
-                                  docstring='Zzzz.... Have good dreams.')
+                                  flags=["METH_VARARGS", "METH_KEYWORDS", "METH_STATIC"])
 
 
     Foo, = [cls for cls in module.classes if cls.name == 'Foo']
@@ -138,7 +132,6 @@ _wrap_PyBar_Hooray_lenx(PyBar *PYBINDGEN_UNUSED(dummy), PyObject *args, PyObject
                                  is_mapping=True)
 
     # just a compilation test, this won't actually work in runtime
-    #module.add_include('<stdio.h>')
-    #module.add_class(name="FILE", foreign_cpp_namespace="", import_from_module="__builtin__ named file")
-    #module.add_enum("reg_errcode_t",   ["REG_NOERROR", "REG_NOMATCH"], import_from_module="__builtin__")
-
+    module.add_include('<stdio.h>')
+    module.add_class(name="FILE", foreign_cpp_namespace="", import_from_module="__builtin__ named file")
+    module.add_enum("reg_errcode_t",   ["REG_NOERROR", "REG_NOMATCH"], import_from_module="__builtin__")

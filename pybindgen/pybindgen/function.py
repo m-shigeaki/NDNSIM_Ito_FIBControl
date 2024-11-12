@@ -2,25 +2,15 @@
 C function wrapper
 """
 
-import sys
-PY3 = (sys.version_info[0] >= 3)
-if PY3:
-    import types
-    string_types = str,
-else:
-    string_types = basestring,
-
-
 from copy import copy
 
-from pybindgen.typehandlers.base import ForwardWrapperBase, ReturnValue
-from pybindgen.typehandlers import codesink
-from pybindgen.cppexception import CppException
+from typehandlers.base import ForwardWrapperBase, ReturnValue
+from typehandlers import codesink
+from cppexception import CppException
 
-from pybindgen import overloading
-from pybindgen import settings
-from pybindgen import utils
-
+import overloading
+import settings
+import utils
 import warnings
 import traceback
 
@@ -62,7 +52,7 @@ class Function(ForwardWrapperBase):
             unblock_threads = settings.unblock_threads
         
         ## backward compatibility check
-        if isinstance(return_value, string_types) and isinstance(function_name, ReturnValue):
+        if isinstance(return_value, str) and isinstance(function_name, ReturnValue):
             warnings.warn("Function has changed API; see the API documentation (but trying to correct...)",
                           DeprecationWarning, stacklevel=2)
             function_name, return_value = return_value, function_name
@@ -89,25 +79,13 @@ class Function(ForwardWrapperBase):
         self.self_parameter_pystruct = None
         self.template_parameters = template_parameters
         self.custom_name = custom_name
+        self.mangled_name = utils.get_mangled_name(function_name, self.template_parameters)
         for t in throw:
             assert isinstance(t, CppException)
         self.throw = list(throw)
         self.custodians_and_wards = [] # list of (custodian, ward, postcall)
-        from pybindgen import cppclass
-        cppclass.scan_custodians_and_wards(self)
-
-    def get_custom_name(self):
-        if self.mangled_name != utils.get_mangled_name(self.function_name, self.template_parameters):
-            return self.mangled_name
-        else:
-            return None
-
-    def set_custom_name(self, custom_name):
-        if custom_name is None:
-            self.mangled_name = utils.get_mangled_name(self.function_name, self.template_parameters)
-        else:
-            self.mangled_name = custom_name
-    custom_name = property(get_custom_name, set_custom_name)
+        cppclass_typehandlers.scan_custodians_and_wards(self)
+        
 
     def clone(self):
         """Creates a semi-deep copy of this function wrapper.  The returned
@@ -117,8 +95,7 @@ class Function(ForwardWrapperBase):
         func = Function(self.function_name,
                         self.return_value,
                         [copy(param) for param in self.parameters],
-                        docstring=self.docstring,
-                        custom_name=self.custom_name)
+                        docstring=self.docstring)
         func._module = self._module
         func.wrapper_base_name = self.wrapper_base_name
         func.wrapper_actual_name = self.wrapper_actual_name
@@ -222,13 +199,11 @@ class Function(ForwardWrapperBase):
 
     def _before_call_hook(self):
         "hook that post-processes parameters and check for custodian=<n> CppClass parameters"
-        from . import cppclass
-        cppclass.implement_parameter_custodians_precall(self)
+        cppclass_typehandlers.implement_parameter_custodians_precall(self)
 
     def _before_return_hook(self):
         "hook that post-processes parameters and check for custodian=<n> CppClass parameters"
-        from . import cppclass
-        cppclass.implement_parameter_custodians_postcall(self)
+        cppclass_typehandlers.implement_parameter_custodians_postcall(self)
 
     def generate(self, code_sink, wrapper_name=None, extra_wrapper_params=()):
         """
@@ -272,8 +247,8 @@ class Function(ForwardWrapperBase):
         ## result) only in order to obtain correct method signature.
         self.reset_code_generation_state()
         self.generate(codesink.NullCodeSink(), extra_wrapper_params=extra_wrapper_parameters)
-        assert isinstance(self.wrapper_return, string_types)
-        assert isinstance(self.wrapper_actual_name, string_types)
+        assert isinstance(self.wrapper_return, str)
+        assert isinstance(self.wrapper_actual_name, str)
         assert isinstance(self.wrapper_args, list)
         code_sink.writeln('%s %s(%s);' % (self.wrapper_return, self.wrapper_actual_name, ', '.join(self.wrapper_args)))
         self.reset_code_generation_state()
@@ -286,8 +261,8 @@ class Function(ForwardWrapperBase):
         :param name: python function/method name
         """
         flags = self.get_py_method_def_flags()
-        assert isinstance(self.wrapper_return, string_types)
-        assert isinstance(self.wrapper_actual_name, string_types)
+        assert isinstance(self.wrapper_return, basestring)
+        assert isinstance(self.wrapper_actual_name, basestring)
         assert isinstance(self.wrapper_args, list)
         return "{(char *) \"%s\", (PyCFunction) %s, %s, %s }," % \
                (name, self.wrapper_actual_name, '|'.join(flags),
@@ -305,13 +280,13 @@ class CustomFunctionWrapper(Function):
     NEEDS_OVERLOADING_INTERFACE = True
 
     def __init__(self, function_name, wrapper_name, wrapper_body=None,
-                 flags=('METH_VARARGS', 'METH_KEYWORDS'), docstring=None):
+                 flags=('METH_VARARGS', 'METH_KEYWORDS')):
         """
         :param function_name: name for function, Python side
         :param wrapper_name: name of the C wrapper function
         :param wrapper_body: if not None, the function wrapper is generated containing this parameter value as function body
         """
-        super(CustomFunctionWrapper, self).__init__(function_name, ReturnValue.new('void'), [], docstring=docstring)
+        super(CustomFunctionWrapper, self).__init__(function_name, ReturnValue.new('void'), [])
         self.wrapper_base_name = wrapper_name
         self.wrapper_actual_name = wrapper_name
         self.meth_flags = list(flags)
@@ -338,4 +313,4 @@ class OverloadedFunction(overloading.OverloadedWrapper):
     RETURN_TYPE = 'PyObject *'
     ERROR_RETURN = 'return NULL;'
 
-#import cppclass_typehandlers
+import cppclass_typehandlers

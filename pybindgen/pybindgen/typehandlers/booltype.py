@@ -1,7 +1,7 @@
 # docstrings not neede here (the type handler interfaces are fully
 # documented in base.py) pylint: disable-msg=C0111
 
-from .base import ReturnValue, Parameter, \
+from base import ReturnValue, Parameter, \
      ReverseWrapperBase, ForwardWrapperBase
 
 
@@ -66,8 +66,7 @@ class BoolPtrParam(Parameter):
 
     def convert_python_to_c(self, wrapper):
         #assert self.ctype == 'bool*'
-        base_ctype = self.type_traits.target or self.ctype_no_const
-        name = wrapper.declarations.declare_variable(str(base_ctype), self.name)
+        name = wrapper.declarations.declare_variable(self.ctype_no_const[:-1], self.name)
         wrapper.call_params.append('&'+name)
         if self.direction & self.DIRECTION_IN:
             py_name = wrapper.declarations.declare_variable("PyObject*", 'py_'+self.name)
@@ -98,7 +97,7 @@ class BoolRefParam(Parameter):
 
     def convert_python_to_c(self, wrapper):
         #assert self.ctype == 'bool&'
-        name = wrapper.declarations.declare_variable("bool", self.name)
+        name = wrapper.declarations.declare_variable(self.ctype_no_const[:-1], self.name)
         wrapper.call_params.append(name)
         if self.direction & self.DIRECTION_IN:
             py_name = wrapper.declarations.declare_variable("PyObject*", 'py_'+self.name)

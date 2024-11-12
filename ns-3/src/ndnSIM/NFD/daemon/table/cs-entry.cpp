@@ -56,6 +56,15 @@ Entry::updateStaleTime()
   }
 }
 
+void
+Entry::updateCurrentTime()
+{
+  BOOST_ASSERT(this->hasData());
+  auto now = time::steady_clock::now();
+  auto nowtime = time::duration_cast<time::nanoseconds>(now.time_since_epoch());
+  m_currenttime = nowtime.count();
+}
+
 bool
 Entry::canSatisfy(const Interest& interest) const
 {
@@ -77,6 +86,8 @@ Entry::reset()
   m_data.reset();
   m_isUnsolicited = false;
   m_staleTime = time::steady_clock::TimePoint();
+  m_latency = 0;
+  m_currenttime = 0;
 }
 
 } // namespace cs

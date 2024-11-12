@@ -126,7 +126,7 @@ void
 ConsumerZipfMandelbrot::SendPacket()
 {
 
-  if(ns3::getTotalSend() > 299) return;  //by konomu
+  if(ns3::getTotalSend() > 479) return;  //by konomu default299
   if (!m_active)
     return;
 
@@ -175,7 +175,7 @@ ConsumerZipfMandelbrot::SendPacket()
   ns3::increaseTotalSend();
 	//
 
-	//choose Function Type from 1 to 6
+	//choose Function Type from 1 to 12
 	uint32_t functionType = ::ndn::random::generateWord32() % 12 + 1;
 
 	int currentNode = ns3::Simulator::GetContext();

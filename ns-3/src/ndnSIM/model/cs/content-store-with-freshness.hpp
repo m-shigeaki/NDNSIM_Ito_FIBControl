@@ -58,6 +58,9 @@ public:
   virtual inline bool
   Add(shared_ptr<const Data> data);
 
+  virtual inline bool
+  Add(shared_ptr<const Data> data, int latency, long long currenttime);
+
 private:
   inline void
   CleanExpired();
@@ -100,6 +103,19 @@ inline bool
 ContentStoreWithFreshness<Policy>::Add(shared_ptr<const Data> data)
 {
   bool ok = super::Add(data);
+  if (!ok)
+    return false;
+
+  NS_LOG_DEBUG(data->getName() << " added to cache");
+  RescheduleCleaning();
+  return true;
+}
+
+template<class Policy>
+inline bool
+ContentStoreWithFreshness<Policy>::Add(shared_ptr<const Data> data, int latency, long long currenttime)
+{
+  bool ok = super::Add(data, latency, currenttime);
   if (!ok)
     return false;
 

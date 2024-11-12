@@ -1,6 +1,6 @@
 # pylint: disable-msg=W0105
 
-from pybindgen.wrapper_registry import NullWrapperRegistry, StdMapWrapperRegistry
+from wrapper_registry import NullWrapperRegistry, StdMapWrapperRegistry
 
 """
 
@@ -40,11 +40,8 @@ Error handler, or None.  When it is None, code generation exceptions
 propagate to the caller.  Else it can be a
 :class:`pybindgen.settings.ErrorHandler` subclass instance that handles the error.
 """
-import sys
-if sys.version_info[0] >= 3:
-    min_python_version=(3, 1)
-else:
-    min_python_version=(2, 3)
+
+min_python_version=(2, 3)
 """
 Minimum python version the generated code must support.
 """

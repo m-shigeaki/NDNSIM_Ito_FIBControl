@@ -1,4 +1,4 @@
-from pybindgen.typehandlers.ctypeparser import tokenizer
+import tokenizer
 
 
 MODIFIERS = ['const', 'volatile'] # XXX: are there others?
@@ -341,8 +341,6 @@ class TypeTraits(object):
             target_tokens.reverse()
             self.target = CType(target_tokens)
             self.target.remove_modifiers()
-        self.ctype_no_const_no_ref = self.ctype_no_const.clone()
-        self.ctype_no_const_no_ref.remove_outer_modifier("&")
 
     def make_const(self):
         """

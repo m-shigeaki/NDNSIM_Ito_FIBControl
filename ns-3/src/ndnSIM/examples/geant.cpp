@@ -58,7 +58,7 @@ main(int argc, char* argv[])
 	cmd.Parse(argc, argv);
 	//シミュレーション設定
 	//choose one {siraiwaNDN, roundRobin, duration, randChoice, fibControl}
-	const char* type = "siraiwaNDN";
+	const char* type = "duration";
 	//choose one {noCache, onCache}
 	const string cachetype = "onCache";
 	
@@ -84,7 +84,7 @@ main(int argc, char* argv[])
 	if(cachetype == "onCache"){
 		ndn::StackHelper ndnHelper1;
 		ndnHelper1.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize",
-									"100"); // default ContentStore parameters
+									"10"); // default ContentStore parameters
 		ndnHelper1.Install(Names::Find<Node>("Node1"));
 		ndnHelper1.Install(Names::Find<Node>("Node2"));
 		ndnHelper1.Install(Names::Find<Node>("Node3"));
@@ -149,18 +149,27 @@ main(int argc, char* argv[])
 		ndnHelper2.Install(Names::Find<Node>("Producer2"));
 		ndnHelper2.Install(Names::Find<Node>("Producer3"));
 		ndnHelper2.Install(Names::Find<Node>("Producer4"));
+		//ndnHelper2.Install(Names::Find<Node>("Consumer5"));
+		//ndnHelper2.Install(Names::Find<Node>("Consumer6"));
+		//ndnHelper2.Install(Names::Find<Node>("Consumer7"));
+		//ndnHelper2.Install(Names::Find<Node>("Consumer8")); 
+
 	}
 	
+	//NodeContainer nodes;
 
 	// Set BestRoute strategy
 	ndn::StrategyChoiceHelper::InstallAll("/prefix1", "/localhost/nfd/strategy/best-route/%FD%01");
 	ndn::StrategyChoiceHelper::InstallAll("/prefix2", "/localhost/nfd/strategy/best-route/%FD%01");
 	ndn::StrategyChoiceHelper::InstallAll("/prefix3", "/localhost/nfd/strategy/best-route/%FD%01");
 	ndn::StrategyChoiceHelper::InstallAll("/prefix4", "/localhost/nfd/strategy/best-route/%FD%01");
+	//ndn::StrategyChoiceHelper::InstallAll("/prefix5", "/localhost/nfd/strategy/best-route/%FD%01");
 
 	// Installing global routing interface on all nodes
 	ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
 	ndnGlobalRoutingHelper.InstallAll();
+	//ndn::GlobalRoutingHelper::CalculateRoutes(); 
+
 
 	//Consumer1
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer1"), "/F1a", Names::Find<Node>("Node1"), 0);
@@ -229,6 +238,83 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5a", Names::Find<Node>("Node33"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5b", Names::Find<Node>("Node33"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5c", Names::Find<Node>("Node33"), 0);
+	/*
+	//consumer5
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F1a", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F1b", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F1c", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F2a", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F2b", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F2c", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F3a", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F3b", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F3c", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F4a", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F4b", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F4c", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5a", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5b", Names::Find<Node>("Node5"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5c", Names::Find<Node>("Node5"), 0);
+	*/
+
+	//consumer6
+	/*
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1a", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1b", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1c", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F2a", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F2b", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F2c", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F3a", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F3b", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F3c", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F4a", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F4b", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F4c", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5a", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5b", Names::Find<Node>("Node10"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5c", Names::Find<Node>("Node10"), 0);
+	*/
+
+	//consumer7
+	/*
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1a", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1b", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1c", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F2a", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F2b", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F2c", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F3a", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F3b", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F3c", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F4a", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F4b", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F4c", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5a", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5b", Names::Find<Node>("Node3"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5c", Names::Find<Node>("Node3"), 0);
+	*/
+
+	//consumer8
+	/*
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1a", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1b", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1c", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F2a", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F2b", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F2c", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F3a", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F3b", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F3c", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F4a", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F4b", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F4c", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5a", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5b", Names::Find<Node>("Node20"), 0);
+	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5c", Names::Find<Node>("Node20"), 0);
+	*/
+
+
 
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Node1"), "/F1a", Names::Find<Node>("Node3"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Node1"), "/F1b", Names::Find<Node>("Node5"), 0);
@@ -1054,11 +1140,17 @@ main(int argc, char* argv[])
 	Ptr<Node> consumer2 = Names::Find<Node>("Consumer2");
 	Ptr<Node> consumer3 = Names::Find<Node>("Consumer3");
 	Ptr<Node> consumer4 = Names::Find<Node>("Consumer4");
+	//Ptr<Node> consumer5 = Names::Find<Node>("Consumer5");
+	//Ptr<Node> consumer6 = Names::Find<Node>("Consumer6");
+	//Ptr<Node> consumer7 = Names::Find<Node>("Consumer7");
+	//Ptr<Node> consumer8 = Names::Find<Node>("Consumer8");
+	
 
 	Ptr<Node> producer1 = Names::Find<Node>("Producer1");
 	Ptr<Node> producer2 = Names::Find<Node>("Producer2");
 	Ptr<Node> producer3 = Names::Find<Node>("Producer3");
 	Ptr<Node> producer4 = Names::Find<Node>("Producer4");
+	
 
 	//Ptr<Node> consumers[4] = {Names::Find<Node>("Consumer1"), Names::Find<Node>("Consumer2"), Names::Find<Node>("Consumer3"), Names::Find<Node>("Consumer4")};
 
@@ -1067,6 +1159,7 @@ main(int argc, char* argv[])
 	std::string prefix2 = "/prefix2";
 	std::string prefix3 = "/prefix3";
 	std::string prefix4 = "/prefix4";
+	//std::string prefix5 = "/prefix5";
 
 	/*
   for (int i = 0; i < 2; i++) {
@@ -1082,7 +1175,7 @@ main(int argc, char* argv[])
 */
 	
 	//コンシューマーのリクエスト周期
-	string freq = "100";
+	string freq = "10";
 	//ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
 	ndn::AppHelper consumerHelper("ns3::ndn::ConsumerZipfMandelbrot");
 	consumerHelper.SetPrefix(prefix3);
@@ -1112,8 +1205,38 @@ main(int argc, char* argv[])
 	ApplicationContainer app4 = consumerHelper.Install(consumer4);
 	app4.Start(Seconds(0.04));
 	//app4.Stop(Seconds(1.0));
-	
 
+	/*
+	consumerHelper.SetPrefix(prefix1);
+	consumerHelper.SetAttribute("Frequency", StringValue(freq));
+	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
+	ApplicationContainer app5 = consumerHelper.Install(consumer5);
+	app5.Start(Seconds(0.05));
+	*/
+
+	/*
+	consumerHelper.SetPrefix(prefix3);
+	consumerHelper.SetAttribute("Frequency", StringValue(freq));
+	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
+	ApplicationContainer app6 = consumerHelper.Install(consumer6);
+	app6.Start(Seconds(0.06));
+	*/
+
+	/* 
+	consumerHelper.SetPrefix(prefix4);
+	consumerHelper.SetAttribute("Frequency", StringValue(freq));
+	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
+	ApplicationContainer app7 = consumerHelper.Install(consumer7);
+	app7.Start(Seconds(0.07));
+	*/
+
+	/* //consumer8
+	consumerHelper.SetPrefix(prefix2);
+	consumerHelper.SetAttribute("Frequency", StringValue(freq));
+	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
+	ApplicationContainer app8 = consumerHelper.Install(consumer8);
+	app8.Start(Seconds(0.08));
+	*/
 	ndn::AppHelper producerHelper("ns3::ndn::Producer");
 	producerHelper.SetPrefix(prefix1);
 	producerHelper.SetAttribute("PayloadSize", StringValue("1200"));
@@ -1136,13 +1259,16 @@ main(int argc, char* argv[])
 	ndnGlobalRoutingHelper.AddOrigins(prefix2, producer2);
 	ndnGlobalRoutingHelper.AddOrigins(prefix3, producer3);
 	ndnGlobalRoutingHelper.AddOrigins(prefix4, producer4);
+	//ndnGlobalRoutingHelper.AddOrigins(prefix5, producer1);
 
 	// Calculate and install FIBs
 	ndn::GlobalRoutingHelper::CalculateRoutes();
+	
 
-	Simulator::Stop(Seconds(200.0));
+	Simulator::Stop(Seconds(12.0));
 
 	//ndn::CsTracer::InstallAll("CStrace_fibControl_" + freq + ".txt", Seconds(1));
+	ndn::CsTracer::InstallAll("CStrace_duration" + freq +".txt", Seconds(11.99));
 
 	Simulator::Run();
 	std::string filename;
@@ -1185,16 +1311,22 @@ main(int argc, char* argv[])
 		}
 	}
 	
+	int TotalFccSum = 0;
+	
 	std::ofstream writing_file;
 	writing_file.open(filename, std::ios::out);
 	std::cout << "writing " << filename << "..." << getTotalSend() << std::endl;
-	for(int i=1;i<16;i++)
+	for(int i=1;i<16;i++){
 		writing_file << ns3::getTotalFcc(i) << std::endl;
+		TotalFccSum = TotalFccSum + ns3::getTotalFcc(i);
+	}
+	writing_file << TotalFccSum << std::endl;	
 	ns3::printResult();
 
 	writing_file << "" << std::endl;
 	writing_file << ns3::getAverageServiceTime() << std::endl;
 	writing_file << ns3::getServiceNum() << std::endl;
+	
 	Simulator::Destroy();
 
 	return 0;

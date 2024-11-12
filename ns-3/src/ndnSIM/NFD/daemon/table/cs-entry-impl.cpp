@@ -34,9 +34,11 @@ EntryImpl::EntryImpl(const Name& name)
   BOOST_ASSERT(this->isQuery());
 }
 
-EntryImpl::EntryImpl(shared_ptr<const Data> data, bool isUnsolicited)
+EntryImpl::EntryImpl(shared_ptr<const Data> data, bool isUnsolicited, int latency, long long currenttime)
 {
   this->setData(data, isUnsolicited);
+  this->setLatency(latency);
+  this->setCurrentTime(currenttime);
   BOOST_ASSERT(!this->isQuery());
 }
 

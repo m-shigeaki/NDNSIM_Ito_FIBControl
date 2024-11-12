@@ -2,19 +2,10 @@
 Wraps C++ class instance/static attributes.
 """
 
-import sys
-
-PY3 = (sys.version_info[0] >= 3)
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
-
-
-from pybindgen.typehandlers.base import ForwardWrapperBase, ReverseWrapperBase
-from pybindgen.typehandlers import codesink
-from pybindgen import settings
-from pybindgen import utils
+from typehandlers.base import ForwardWrapperBase, ReverseWrapperBase
+from typehandlers import codesink
+import settings
+import utils
 
 
 class PyGetter(ForwardWrapperBase):
@@ -262,8 +253,8 @@ class PyMetaclass(object):
         :param getsets: name of a PyGetSetDef C array variable, or None
         """
         assert getsets is None or isinstance(getsets, PyGetSetDef)
-        assert isinstance(name, string_types)
-        assert isinstance(parent_metaclass_expr, string_types)
+        assert isinstance(name, basestring)
+        assert isinstance(parent_metaclass_expr, basestring)
 
         self.name = name
         prefix = settings.name_prefix.capitalize()
@@ -277,7 +268,8 @@ class PyMetaclass(object):
         """
         code_sink.writeln('''
 PyTypeObject %(pytypestruct)s = {
-        PyVarObject_HEAD_INIT(NULL, 0)
+	PyObject_HEAD_INIT(NULL)
+	0,					/* ob_size */
 	(char *) "%(name)s",		        /* tp_name */
 	0,					/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -400,7 +392,7 @@ class PyGetSetDef(object):
         
         code_sink.writeln("static PyGetSetDef %s[] = {" % self.cname)
         code_sink.indent()
-        for name, (getter_c_name, setter_c_name) in getsets.items():
+        for name, (getter_c_name, setter_c_name) in getsets.iteritems():
             code_sink.writeln('{')
             code_sink.indent()
             code_sink.writeln('(char*) "%s", /* attribute name */' % name)

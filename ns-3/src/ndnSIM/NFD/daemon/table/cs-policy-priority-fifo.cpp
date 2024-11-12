@@ -48,6 +48,7 @@ PriorityFifoPolicy::~PriorityFifoPolicy()
 void
 PriorityFifoPolicy::doAfterInsert(iterator i)
 {
+  //std::cout << "metricsTime: " << std::endl;
   this->attachQueue(i);
   this->evictEntries();
 }

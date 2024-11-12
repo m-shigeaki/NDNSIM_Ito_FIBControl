@@ -12,10 +12,10 @@ else:
 
 def build(bld):
     if not bld.env['ENABLE_PYGCCXML']:
-        print("gccxml not available; skipping the C hello demo")
+        print "gccxml not available; skipping the C hello demo"
         return
 
-    bindgen = bld(
+    bindgen = bld.new_task_gen(
         features='command',
         source='hellomodulegen.py hello.h',
         target='hellomodule.c',
@@ -24,7 +24,7 @@ def build(bld):
     os.environ["PYTHONPATH"] = os.pathsep.join([os.environ.get("PYTHONPATH", ''), bindgen.path.get_bld().abspath()])
 
     if bld.env['CXX']:
-        obj = bld(features='c cshlib pyext')
+        obj = bld.new_task_gen(features='c cshlib pyext')
         obj.source = [
             'hello.c',
             'hellomodule.c'
