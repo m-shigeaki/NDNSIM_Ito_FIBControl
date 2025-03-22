@@ -87,10 +87,10 @@ Consumer4  NA        39.9       92
 Producer2  NA        46.3721       78.0085
 Producer3  NA        26.2974       70.3165
 Producer4  NA        26.2974       70.2165
-#Consumer5  NA        38.6833       80.0167
-#Consumer6  NA        39.1895       75.3643
-#Consumer7  NA        42.5655       85.5759
-#Consumer8  NA        49.0399       77.398
+Consumer5  NA        38.6833       80.0167
+Consumer6  NA        39.1895       75.3643
+Consumer7  NA        42.5655       85.5759
+Consumer8  NA        49.0399       77.398
 # Note that `node` can be any string. It is possible to access to the node by name using Names::Find, see examples.
 
 # link section defines point-to-point links between nodes and characteristics of these links
@@ -185,7 +185,7 @@ Consumer1   Node1       1Mbps       1       0ms     1000
 Consumer2   Node7       1Mbps       1       0ms     1000
 Consumer3   Node11       1Mbps       1       0ms     1000
 Consumer4   Node33       1Mbps       1       0ms     1000
-#Consumer5   Node5        1Mbps       1       0ms     1000
-#Consumer6   Node10        1Mbps       1       0ms     1000
-#Consumer7   Node3        1Mbps       1       0ms     1000
-#Consumer8   Node20        1Mbps       1       0ms     1000
+Consumer5   Node5        1Mbps       1       0ms     1000
+Consumer6   Node10        1Mbps       1       0ms     1000
+Consumer7   Node3        1Mbps       1       0ms     1000
+Consumer8   Node20        1Mbps       1       0ms     1000

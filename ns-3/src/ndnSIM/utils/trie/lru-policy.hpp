@@ -81,12 +81,13 @@ struct lru_policy_traits {
         auto it = policy_container::begin();
         auto& ref = *it;
         auto it_min = it;
-
-        auto metricstime_min = ref.payload()->GetLatency() + ref.payload()->GetCurrentTime();
+        double late_weight =(double) 2.0;
+       // std::cout << "late_weight:" << late_weight << std::endl;
+        auto metricstime_min = late_weight * (ref.payload()->GetLatency()) + ref.payload()->GetCurrentTime();
 
          for(auto it = policy_container::begin();it != policy_container::end();++it){
            auto& ref = *it;
-           auto it_metricstime = ref.payload()->GetLatency() + ref.payload()->GetCurrentTime();
+           auto it_metricstime = late_weight * (ref.payload()->GetLatency()) + ref.payload()->GetCurrentTime();
 
            if(metricstime_min > it_metricstime){
              metricstime_min = it_metricstime;
@@ -94,18 +95,18 @@ struct lru_policy_traits {
            }
          }
          base_.erase(&(*it_min));
-        */
+       */
 
 
-        /* //only-latency start
+        ///* //only-latency start
         auto it = policy_container::begin();
         auto& ref = *it;
-        int latency_min = ref.payload()->GetLatency();
+        auto latency_min = ref.payload()->GetLatency();
         auto it_min = it;
         
         for(auto it = policy_container::begin();it != policy_container::end();++it){
           auto& ref = *it;
-          int it_latency = ref.payload()->GetLatency();
+          auto it_latency = ref.payload()->GetLatency();
 
           if(latency_min > it_latency ){
             latency_min = it_latency;
@@ -113,7 +114,7 @@ struct lru_policy_traits {
           }
         }
         base_.erase(&(*it_min));
-        */ //only-latency end
+        //*/ //only-latency end
 
         /* //Func-LRU
         bool found = false;
@@ -132,7 +133,7 @@ struct lru_policy_traits {
            base_.erase(&(*policy_container::begin())); 
         }
         */
-          base_.erase(&(*policy_container::begin())); //default lru
+          //base_.erase(&(*policy_container::begin())); //default lru
         }
       
      

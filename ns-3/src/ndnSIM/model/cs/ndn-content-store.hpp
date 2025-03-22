@@ -64,7 +64,7 @@ public:
    */
   Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data);
 
-  Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime);
+  Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, long long latency, long long currenttime);
 
   /**
    * \brief Get prefix of the stored entry
@@ -92,7 +92,7 @@ public:
   const bool
   hasFunction();
 
-  const int
+  const long long
   GetLatency();
 
   const long long
@@ -104,7 +104,7 @@ public:
 private:
   Ptr<ContentStore> m_cs;        ///< \brief content store to which entry is added
   shared_ptr<const Data> m_data; ///< \brief non-modifiable Data
-  int m_latency;
+  long long m_latency;
   long long m_time;
 };
 
@@ -150,7 +150,7 @@ public:
   Add(shared_ptr<const Data> data) = 0;
 
   virtual bool
-  Add(shared_ptr<const Data> data, int latency, long long currenttime) = 0;
+  Add(shared_ptr<const Data> data, long long latency, long long currenttime) = 0;
 
   // /*
   //  * \brief Add a new content to the content store.

@@ -53,7 +53,7 @@ public:
   {
   }
 
-  EntryImpl(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime)
+  EntryImpl(Ptr<ContentStore> cs, shared_ptr<const Data> data, long long latency, long long currenttime)
     : Entry(cs, data, latency, currenttime)
     , item_(0)
   {
@@ -116,7 +116,7 @@ public:
 
 
   virtual inline bool
-  Add(shared_ptr<const Data> data, int latency, long long currenttime);
+  Add(shared_ptr<const Data> data, long long latency, long long currenttime);
 
   // virtual bool
   // Remove (shared_ptr<Interest> header);
@@ -269,7 +269,7 @@ ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data)
 
 template<class Policy>
 bool
-ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data, int latency, long long currenttime)
+ContentStoreImpl<Policy>::Add(shared_ptr<const Data> data, long long latency, long long currenttime)
 {
   NS_LOG_FUNCTION(this << data->getName());
 

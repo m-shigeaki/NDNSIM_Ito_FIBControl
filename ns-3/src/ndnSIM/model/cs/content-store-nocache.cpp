@@ -63,7 +63,7 @@ Nocache::Add(shared_ptr<const Data> data)
 }
 
 bool
-Nocache::Add(shared_ptr<const Data> data, int latency, long long currenttime)
+Nocache::Add(shared_ptr<const Data> data, long long latency, long long currenttime)
 {
   return false;
 }

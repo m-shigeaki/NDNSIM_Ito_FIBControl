@@ -66,7 +66,7 @@ Entry::Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data)
 {
 }
 
-Entry::Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, int latency, long long currenttime)
+Entry::Entry(Ptr<ContentStore> cs, shared_ptr<const Data> data, long long latency, long long currenttime)
   : m_cs(cs)
   , m_data(data)
   , m_latency(latency)
@@ -119,7 +119,7 @@ Entry::hasFunction()
   }
 }
 //*/
-const int
+const long long
 Entry::GetLatency()
 {
   return m_latency;

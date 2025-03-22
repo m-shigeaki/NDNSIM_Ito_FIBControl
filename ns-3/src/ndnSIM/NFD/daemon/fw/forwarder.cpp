@@ -1879,7 +1879,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 //	std::cout << "Content  Name : " << data.getName() << std::endl;
 	//if(ns3::getChoiceType() != 0){
 		if(39 <= currentNode && currentNode <= 53){ //us24:26-40,Sinet,Geant:39-53
-			data.setServiceTime(data.getServiceTime() + time::milliseconds(80)); //default40
+			data.setServiceTime(data.getServiceTime() + time::milliseconds(40)); //default40
 		}
 	//}
 
@@ -2134,7 +2134,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
   
 //  time::nanoseconds time1temp = time::nanoseconds(data.getFreshnessPeriod());
 //  int time1 = time1temp.count();
-  int time2 = time2temp.count(); //latency
+  long long time2 = time2temp.count(); //latency
   long long Now = Nowtime.count(); //currenttime
 //*/
 //std::cout << "data" << data << std::endl;

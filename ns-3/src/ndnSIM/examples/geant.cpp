@@ -149,10 +149,10 @@ main(int argc, char* argv[])
 		ndnHelper2.Install(Names::Find<Node>("Producer2"));
 		ndnHelper2.Install(Names::Find<Node>("Producer3"));
 		ndnHelper2.Install(Names::Find<Node>("Producer4"));
-		//ndnHelper2.Install(Names::Find<Node>("Consumer5"));
-		//ndnHelper2.Install(Names::Find<Node>("Consumer6"));
-		//ndnHelper2.Install(Names::Find<Node>("Consumer7"));
-		//ndnHelper2.Install(Names::Find<Node>("Consumer8")); 
+		ndnHelper2.Install(Names::Find<Node>("Consumer5"));
+		ndnHelper2.Install(Names::Find<Node>("Consumer6"));
+		ndnHelper2.Install(Names::Find<Node>("Consumer7"));
+		ndnHelper2.Install(Names::Find<Node>("Consumer8")); 
 
 	}
 	
@@ -238,7 +238,7 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5a", Names::Find<Node>("Node33"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5b", Names::Find<Node>("Node33"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer4"), "/F5c", Names::Find<Node>("Node33"), 0);
-	/*
+	///*
 	//consumer5
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F1a", Names::Find<Node>("Node5"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F1b", Names::Find<Node>("Node5"), 0);
@@ -255,10 +255,10 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5a", Names::Find<Node>("Node5"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5b", Names::Find<Node>("Node5"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer5"), "/F5c", Names::Find<Node>("Node5"), 0);
-	*/
+	//*/
 
 	//consumer6
-	/*
+	///*
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1a", Names::Find<Node>("Node10"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1b", Names::Find<Node>("Node10"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F1c", Names::Find<Node>("Node10"), 0);
@@ -274,10 +274,10 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5a", Names::Find<Node>("Node10"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5b", Names::Find<Node>("Node10"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer6"), "/F5c", Names::Find<Node>("Node10"), 0);
-	*/
+	//*/
 
 	//consumer7
-	/*
+	///*
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1a", Names::Find<Node>("Node3"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1b", Names::Find<Node>("Node3"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F1c", Names::Find<Node>("Node3"), 0);
@@ -293,10 +293,10 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5a", Names::Find<Node>("Node3"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5b", Names::Find<Node>("Node3"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer7"), "/F5c", Names::Find<Node>("Node3"), 0);
-	*/
+	//*/
 
 	//consumer8
-	/*
+	///*
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1a", Names::Find<Node>("Node20"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1b", Names::Find<Node>("Node20"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F1c", Names::Find<Node>("Node20"), 0);
@@ -312,7 +312,7 @@ main(int argc, char* argv[])
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5a", Names::Find<Node>("Node20"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5b", Names::Find<Node>("Node20"), 0);
 	ndn::FibHelper::AddRoute(Names::Find<Node>("Consumer8"), "/F5c", Names::Find<Node>("Node20"), 0);
-	*/
+	//*/
 
 
 
@@ -1140,10 +1140,10 @@ main(int argc, char* argv[])
 	Ptr<Node> consumer2 = Names::Find<Node>("Consumer2");
 	Ptr<Node> consumer3 = Names::Find<Node>("Consumer3");
 	Ptr<Node> consumer4 = Names::Find<Node>("Consumer4");
-	//Ptr<Node> consumer5 = Names::Find<Node>("Consumer5");
-	//Ptr<Node> consumer6 = Names::Find<Node>("Consumer6");
-	//Ptr<Node> consumer7 = Names::Find<Node>("Consumer7");
-	//Ptr<Node> consumer8 = Names::Find<Node>("Consumer8");
+	Ptr<Node> consumer5 = Names::Find<Node>("Consumer5");
+	Ptr<Node> consumer6 = Names::Find<Node>("Consumer6");
+	Ptr<Node> consumer7 = Names::Find<Node>("Consumer7");
+	Ptr<Node> consumer8 = Names::Find<Node>("Consumer8");
 	
 
 	Ptr<Node> producer1 = Names::Find<Node>("Producer1");
@@ -1206,37 +1206,37 @@ main(int argc, char* argv[])
 	app4.Start(Seconds(0.04));
 	//app4.Stop(Seconds(1.0));
 
-	/*
+	///*
 	consumerHelper.SetPrefix(prefix1);
 	consumerHelper.SetAttribute("Frequency", StringValue(freq));
 	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
 	ApplicationContainer app5 = consumerHelper.Install(consumer5);
 	app5.Start(Seconds(0.05));
-	*/
+	//*/
 
-	/*
+	///*
 	consumerHelper.SetPrefix(prefix3);
 	consumerHelper.SetAttribute("Frequency", StringValue(freq));
 	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
 	ApplicationContainer app6 = consumerHelper.Install(consumer6);
 	app6.Start(Seconds(0.06));
-	*/
+	//*/
 
-	/* 
+	///* 
 	consumerHelper.SetPrefix(prefix4);
 	consumerHelper.SetAttribute("Frequency", StringValue(freq));
 	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
 	ApplicationContainer app7 = consumerHelper.Install(consumer7);
 	app7.Start(Seconds(0.07));
-	*/
+	//*/
 
-	/* //consumer8
+	///* //consumer8
 	consumerHelper.SetPrefix(prefix2);
 	consumerHelper.SetAttribute("Frequency", StringValue(freq));
 	consumerHelper.SetAttribute("NumberOfContents", StringValue("30"));
 	ApplicationContainer app8 = consumerHelper.Install(consumer8);
 	app8.Start(Seconds(0.08));
-	*/
+	//*/
 	ndn::AppHelper producerHelper("ns3::ndn::Producer");
 	producerHelper.SetPrefix(prefix1);
 	producerHelper.SetAttribute("PayloadSize", StringValue("1200"));

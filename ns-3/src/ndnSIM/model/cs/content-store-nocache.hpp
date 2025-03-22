@@ -59,7 +59,7 @@ public:
   Add(shared_ptr<const Data> data);
 
   virtual bool
-  Add(shared_ptr<const Data> data, int latency, long long currenttime);
+  Add(shared_ptr<const Data> data, long long latency, long long currenttime);
 
   virtual void
   Print(std::ostream& os) const;
